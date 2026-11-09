@@ -1,6 +1,6 @@
 # Fasl (فصل)
 
-Know your crop from one photo. A web app for Pakistani agricultural departments such as NARC, built with Next.js (App Router), TypeScript, Tailwind CSS, GSAP and Motion.
+Know your crop from one photo. A web app for Pakistani agricultural departments such as NARC, built with Next.js (App Router), TypeScript, Tailwind CSS, GSAP and Framer Motion.
 
 - `/` is the website.
 - `/dashboard` is the working dashboard: upload or take a photo, get a report.
