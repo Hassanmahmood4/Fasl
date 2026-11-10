@@ -1,0 +1,48 @@
+{
+  "placeholder": true,
+  "summary": { "accuracy": 0.5, "f1": 0.5, "images": 0, "classes": 9, "latency_ms": 0 },
+  "history": [
+    { "epoch": 1, "train_acc": 0.3, "val_acc": 0.28, "train_loss": 1.6, "val_loss": 1.7 },
+    { "epoch": 2, "train_acc": 0.36, "val_acc": 0.33, "train_loss": 1.4, "val_loss": 1.5 },
+    { "epoch": 3, "train_acc": 0.41, "val_acc": 0.37, "train_loss": 1.25, "val_loss": 1.35 },
+    { "epoch": 4, "train_acc": 0.45, "val_acc": 0.41, "train_loss": 1.12, "val_loss": 1.24 },
+    { "epoch": 5, "train_acc": 0.49, "val_acc": 0.44, "train_loss": 1.02, "val_loss": 1.16 },
+    { "epoch": 6, "train_acc": 0.52, "val_acc": 0.46, "train_loss": 0.94, "val_loss": 1.1 },
+    { "epoch": 7, "train_acc": 0.55, "val_acc": 0.48, "train_loss": 0.87, "val_loss": 1.05 },
+    { "epoch": 8, "train_acc": 0.57, "val_acc": 0.49, "train_loss": 0.81, "val_loss": 1.02 },
+    { "epoch": 9, "train_acc": 0.59, "val_acc": 0.5, "train_loss": 0.76, "val_loss": 1.0 },
+    { "epoch": 10, "train_acc": 0.6, "val_acc": 0.5, "train_loss": 0.72, "val_loss": 0.99 }
+  ],
+  "confusion": {
+    "disease": {
+      "labels": ["Healthy", "Leaf rust", "Yellow rust", "Powdery mildew"],
+      "matrix": [
+        [5, 2, 2, 1],
+        [2, 5, 2, 1],
+        [2, 2, 5, 1],
+        [1, 2, 2, 5]
+      ]
+    },
+    "stage": {
+      "labels": ["Tillering", "Booting", "Heading", "Grain filling", "Ripe"],
+      "matrix": [
+        [5, 2, 1, 1, 1],
+        [2, 5, 1, 1, 1],
+        [1, 2, 5, 1, 1],
+        [1, 1, 2, 5, 1],
+        [1, 1, 1, 2, 5]
+      ]
+    }
+  },
+  "per_class": [
+    { "label": "Healthy", "precision": 0.5, "recall": 0.5, "f1": 0.5 },
+    { "label": "Leaf rust", "precision": 0.5, "recall": 0.5, "f1": 0.5 },
+    { "label": "Yellow rust", "precision": 0.5, "recall": 0.5, "f1": 0.5 },
+    { "label": "Powdery mildew", "precision": 0.5, "recall": 0.5, "f1": 0.5 },
+    { "label": "Tillering", "precision": 0.5, "recall": 0.5, "f1": 0.5 },
+    { "label": "Booting", "precision": 0.5, "recall": 0.5, "f1": 0.5 },
+    { "label": "Heading", "precision": 0.5, "recall": 0.5, "f1": 0.5 },
+    { "label": "Grain filling", "precision": 0.5, "recall": 0.5, "f1": 0.5 },
+    { "label": "Ripe", "precision": 0.5, "recall": 0.5, "f1": 0.5 }
+  ]
+}
