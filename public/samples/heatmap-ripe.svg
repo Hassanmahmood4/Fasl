@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="hole"><stop offset="0.35" stop-color="#000"/><stop offset="1" stop-color="#fff"/></radialGradient>
+    <radialGradient id="glow"><stop offset="0" stop-color="#E3C07E" stop-opacity="0.6"/><stop offset="1" stop-color="#E3C07E" stop-opacity="0"/></radialGradient>
+    <mask id="veil"><rect width="1200" height="900" fill="#fff"/><ellipse cx="620" cy="360" rx="420" ry="340" fill="url(#hole)" style="mix-blend-mode:multiply"/></mask>
+  </defs>
+  <rect width="1200" height="900" fill="#121212" fill-opacity="0.72" mask="url(#veil)"/>
+  <ellipse cx="620" cy="360" rx="360" ry="290" fill="url(#glow)"/>
+</svg>
