@@ -15,7 +15,7 @@ export const SAMPLES: Sample[] = [
     },
     report: {
       crop: { name: "Wheat", confidence: 0.96 },
-      stage: { index: 5, name: "Ripe", total: 5, confidence: 0.91 },
+      stage: { index: 4, name: "Ripening", total: 4, confidence: 0.91 },
       readiness: { ready: true },
       health: { status: "healthy", confidence: 0.93 },
       actions: [
@@ -37,7 +37,7 @@ export const SAMPLES: Sample[] = [
     },
     report: {
       crop: { name: "Wheat", confidence: 0.94 },
-      stage: { index: 3, name: "Heading", total: 5, confidence: 0.84 },
+      stage: { index: 2, name: "Flowering", total: 4, confidence: 0.84 },
       readiness: { ready: false, daysLeft: [30, 40] },
       health: {
         status: "disease",
@@ -65,7 +65,7 @@ export const SAMPLES: Sample[] = [
     },
     report: {
       crop: { name: "Wheat", confidence: 0.95 },
-      stage: { index: 3, name: "Heading", total: 5, confidence: 0.86 },
+      stage: { index: 2, name: "Flowering", total: 4, confidence: 0.86 },
       readiness: { ready: false, daysLeft: [30, 40] },
       health: { status: "healthy", confidence: 0.9 },
       actions: [
@@ -89,7 +89,7 @@ export const UNCLEAR_SAMPLE: Sample = {
   },
   report: {
     crop: { name: "Wheat", confidence: 0.41 },
-    stage: { index: 1, name: "Tillering", total: 5, confidence: 0.32 },
+    stage: { index: 1, name: "Vegetative", total: 4, confidence: 0.32 },
     readiness: { ready: false },
     health: { status: "healthy", confidence: 0.38 },
     actions: [],

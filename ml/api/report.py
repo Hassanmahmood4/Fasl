@@ -35,6 +35,37 @@ DISEASE_ACTIONS = {
 
 UNCLEAR = {"status": "unclear", "message": "Photo unclear. Retake it closer, in daylight."}
 
+# Urdu, for the spoken summary. Stage names are in the form used before "میں ہے".
+STAGE_UR = {
+    "vegetative": "ابتدائی بڑھوتری کے مرحلے",
+    "flowering": "پھول آنے کے مرحلے",
+    "grain_filling": "دانہ بننے کے مرحلے",
+    "ripening": "پکنے کے مرحلے",
+}
+
+DISEASE_UR = {
+    "brown_rust": "بھوری کنگی",
+    "yellow_rust": "پیلی کنگی",
+    "stem_rust": "تنے کی کالی کنگی",
+    "septoria": "سپٹوریا کے دھبوں",
+    "loose_smut": "کانگیاری",
+    "powdery_mildew": "سفوفی پھپھوندی",
+}
+
+
+def urdu_summary(stage: Head, health: Head) -> str:
+    parts = ["یہ گندم کی فصل ہے۔", f"فصل {STAGE_UR[stage.label]} میں ہے۔"]
+    if health.label == "healthy":
+        parts.append("فصل صحت مند ہے، کوئی بیماری نظر نہیں آئی۔ ہر ہفتے کھیت کا معائنہ کرتے رہیں۔")
+    else:
+        parts.append(f"فصل میں {DISEASE_UR[health.label]} کی علامات نظر آئی ہیں۔")
+        parts.append("اسپرے کرنے سے پہلے اپنے مقامی محکمہ زراعت کے افسر سے تصدیق ضرور کریں۔")
+    if stage.label == "ripening":
+        parts.append("فصل پک رہی ہے۔ جب دانے سخت اور خشک ہو جائیں تو کٹائی کا انتظام کریں۔")
+    else:
+        parts.append("فصل ابھی کٹائی کے لیے تیار نہیں ہے۔")
+    return " ".join(parts)
+
 
 def build_report(stage: Head, health: Head, threshold: float) -> dict:
     if health.label == "not_wheat":
