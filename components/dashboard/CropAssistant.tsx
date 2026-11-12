@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Mic, MicOff, Send, Square, Volume2 } from "lucide-react";
+import { LoaderCircle, Mic, MicOff, Send, Square, Volume2 } from "lucide-react";
 import { AssistantError, askAssistant, type AssistantLanguage, type ChatTurn } from "@/lib/assistant/api";
-import { speak, stopSpeaking, useSpeechInput } from "@/lib/assistant/speech";
+import { prepareSpeech, speak, stopSpeaking, useSpeechInput } from "@/lib/assistant/speech";
 import type { Report } from "@/lib/demo/types";
 
 const COPY: Record<AssistantLanguage, { placeholder: string; hint: string; thinking: string }> = {
@@ -30,7 +30,21 @@ export function CropAssistant({ report }: { report: Report }) {
   const [waiting, setWaiting] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [speakingIndex, setSpeakingIndex] = useState<number | null>(null);
+  /** False while the voice for speakingIndex is still loading. */
+  const [voiceStarted, setVoiceStarted] = useState(false);
   const log = useRef<HTMLDivElement>(null);
+
+  const startSpeaking = (index: number, turn: ChatTurn) => {
+    setVoiceStarted(false);
+    const started = speak(
+      turn.text,
+      turn.language,
+      () => setSpeakingIndex((current) => (current === index ? null : current)),
+      () => setVoiceStarted(true),
+    );
+    if (started) setSpeakingIndex(index);
+    else setProblem("This device has no Urdu voice to read replies aloud.");
+  };
 
   const send = async (text: string, spoken: boolean) => {
     const message = text.trim();
@@ -45,10 +59,9 @@ export function CropAssistant({ report }: { report: Report }) {
       const reply = await askAssistant(message, language, report, history);
       const answer: ChatTurn = { role: "assistant", text: reply, language };
       setTurns((current) => [...current, answer]);
-      // Spoken questions get spoken answers.
-      if (spoken && speak(reply, language, () => setSpeakingIndex(null))) {
-        setSpeakingIndex(history.length + 1);
-      }
+      // Spoken questions get spoken answers; typed ones get their voice ready in case it's wanted.
+      if (spoken) startSpeaking(history.length + 1, answer);
+      else prepareSpeech(reply, language);
     } catch (error) {
       setProblem(error instanceof AssistantError ? error.message : "Something went wrong. Please try again.");
     } finally {
@@ -80,8 +93,7 @@ export function CropAssistant({ report }: { report: Report }) {
       setSpeakingIndex(null);
       return;
     }
-    if (speak(turn.text, turn.language, () => setSpeakingIndex(null))) setSpeakingIndex(index);
-    else setProblem("This device has no Urdu voice to read replies aloud.");
+    startSpeaking(index, turn);
   };
 
   const copy = COPY[language];
@@ -139,10 +151,19 @@ export function CropAssistant({ report }: { report: Report }) {
                 <button
                   type="button"
                   onClick={() => toggleSpeech(index, turn)}
-                  aria-label={speakingIndex === index ? "Stop reading aloud" : "Read this reply aloud"}
+                  aria-label={
+                    speakingIndex !== index ? "Read this reply aloud" : voiceStarted ? "Stop reading aloud" : "Loading voice, tap to cancel"
+                  }
+                  aria-busy={speakingIndex === index && !voiceStarted}
                   className="inline-flex size-8 shrink-0 items-center justify-center rounded-full text-charcoal hover:bg-wheat"
                 >
-                  {speakingIndex === index ? <Square aria-hidden="true" className="size-4" /> : <Volume2 aria-hidden="true" className="size-4" />}
+                  {speakingIndex !== index ? (
+                    <Volume2 aria-hidden="true" className="size-4" />
+                  ) : voiceStarted ? (
+                    <Square aria-hidden="true" className="size-4" />
+                  ) : (
+                    <LoaderCircle aria-hidden="true" className="size-4 animate-spin motion-reduce:animate-none" />
+                  )}
                 </button>
               )}
             </div>

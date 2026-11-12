@@ -106,54 +106,160 @@ function findVoice(language: AssistantLanguage): SpeechSynthesisVoice | undefine
     .find((voice) => voice.lang.toLowerCase().startsWith(prefix));
 }
 
-const TTS_TIMEOUT_MS = 20_000;
+const TTS_TIMEOUT_MS = 12_000;
 
-/* Server voice: the same female Urdu voice (ur-PK-UzmaNeural) as the report audio. */
-let current: { audio: HTMLAudioElement; url: string; abort: AbortController } | null = null;
+/* Server voice: the same female Urdu voice (ur-PK-UzmaNeural) as the report audio.
+ * A reply is voiced in pieces: the first sentence is short, so it starts in about a second,
+ * and each next piece downloads while the one before it plays. */
+type Session = { stop: AbortController; audio: HTMLAudioElement; urls: string[] };
+let session: Session | null = null;
 
-function stopServerAudio() {
-  if (!current) return;
-  current.abort.abort();
-  current.audio.pause();
-  URL.revokeObjectURL(current.url);
-  current = null;
+const FIRST_PIECE = 120;
+const LATER_PIECE = 400;
+
+/** Splits text at sentence ends (English and Urdu punctuation) into pieces for the voice service. */
+function pieces(text: string): string[] {
+  const sentences = text.split(/(?<=[.!?۔؟])\s+|\n+/).map((s) => s.trim()).filter(Boolean);
+  const out: string[] = [];
+  let piece = "";
+  for (const sentence of sentences) {
+    const limit = out.length === 0 ? FIRST_PIECE : LATER_PIECE;
+    if (piece && piece.length + sentence.length + 1 > limit) {
+      out.push(piece);
+      piece = "";
+    }
+    piece = piece ? `${piece} ${sentence}` : sentence;
+  }
+  if (piece) out.push(piece);
+  return out;
 }
 
-async function playFromServer(text: string, language: AssistantLanguage, onEnd?: () => void): Promise<boolean> {
+function stopServerAudio() {
+  if (!session) return;
+  session.stop.abort();
+  session.audio.pause();
+  session.urls.forEach((url) => URL.revokeObjectURL(url));
+  session = null;
+}
+
+/* Most of the wait is the voice service's fixed start-up per request (~1.5 s), not the text length,
+ * so replies are voiced ahead of time: by the time someone taps the speaker, the audio is usually here. */
+const PREPARED_LIMIT = 24;
+const prepared = new Map<string, Promise<Blob>>();
+
+function download(text: string, language: AssistantLanguage, signal?: AbortSignal): Promise<Blob> {
   const abort = new AbortController();
-  let timedOut = false;
-  const timer = setTimeout(() => {
-    timedOut = true;
-    abort.abort();
-  }, TTS_TIMEOUT_MS);
-  current = { audio: new Audio(), url: "", abort }; // lets stopSpeaking() cancel the download
-  try {
-    const response = await fetch(apiUrl("/tts"), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, language }),
-      signal: abort.signal,
+  const cancel = () => abort.abort();
+  signal?.addEventListener("abort", cancel);
+  const timer = setTimeout(cancel, TTS_TIMEOUT_MS);
+  return fetch(apiUrl("/tts"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, language }),
+    signal: abort.signal,
+  })
+    .then((response) => {
+      if (!response.ok) throw new Error("Voice service failed");
+      return response.blob();
+    })
+    .finally(() => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", cancel);
     });
-    if (!response.ok) return false;
-    const blob = await response.blob();
-    if (current?.abort !== abort) return true; // stopped while downloading
-    const url = URL.createObjectURL(blob);
-    const audio = new Audio(url);
-    current = { audio, url, abort };
-    const done = () => {
-      if (current?.audio === audio) stopServerAudio();
-      onEnd?.();
-    };
-    audio.onended = done;
-    audio.onerror = done;
-    await audio.play();
-    return true;
-  } catch {
-    // Stopped by the user: nothing more to do. Network error or timeout: let the caller fall back.
-    return abort.signal.aborted && !timedOut;
-  } finally {
-    clearTimeout(timer);
+}
+
+function prepare(text: string, language: AssistantLanguage): Promise<Blob> {
+  const key = `${language}:${text}`;
+  let blob = prepared.get(key);
+  if (!blob) {
+    blob = download(text, language);
+    blob.catch(() => prepared.delete(key)); // a failed download is retried on demand
+    prepared.set(key, blob);
+    if (prepared.size > PREPARED_LIMIT) prepared.delete(prepared.keys().next().value as string);
   }
+  return blob;
+}
+
+/** Starts voicing a reply in the background, so reading it aloud later starts at once. Never throws. */
+export function prepareSpeech(text: string, language: AssistantLanguage) {
+  pieces(text).slice(0, 2).forEach((piece) => void prepare(piece, language).catch(() => undefined));
+}
+
+/** One piece as an object URL: prepared audio if there is any, otherwise a fresh download. */
+async function fetchPiece(text: string, language: AssistantLanguage, s: Session): Promise<string> {
+  let blob: Blob;
+  try {
+    blob = await prepare(text, language);
+  } catch {
+    blob = await download(text, language, s.stop.signal);
+  }
+  if (s.stop.signal.aborted) throw new Error("Stopped");
+  const url = URL.createObjectURL(blob);
+  s.urls.push(url);
+  return url;
+}
+
+/** Plays one downloaded piece to its end, or until speech is stopped. */
+function playPiece(url: string, s: Session): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const done = () => {
+      s.audio.onended = s.audio.onerror = null;
+      s.stop.signal.removeEventListener("abort", done);
+      resolve();
+    };
+    s.audio.onended = done;
+    s.audio.onerror = () => reject(new Error("Audio failed"));
+    s.stop.signal.addEventListener("abort", done);
+    s.audio.src = url;
+    s.audio.play().catch(reject);
+  });
+}
+
+/**
+ * Voices the pieces in order, fetching the next while the current one plays.
+ * Returns how many pieces played, or null if the user stopped it.
+ */
+async function playFromServer(parts: string[], language: AssistantLanguage, s: Session, onStart?: () => void): Promise<number | null> {
+  let next: Promise<string> | null = fetchPiece(parts[0], language, s);
+  for (let i = 0; i < parts.length; i++) {
+    let url: string;
+    try {
+      url = await (next as Promise<string>);
+    } catch {
+      return s.stop.signal.aborted ? null : i;
+    }
+    next = i + 1 < parts.length ? fetchPiece(parts[i + 1], language, s) : null;
+    next?.catch(() => undefined); // handled when awaited
+    try {
+      const playing = playPiece(url, s);
+      if (i === 0) onStart?.();
+      await playing;
+    } catch {
+      return s.stop.signal.aborted ? null : i;
+    }
+    if (s.stop.signal.aborted) return null;
+  }
+  return parts.length;
+}
+
+/**
+ * Reads text aloud with the server voice, falling back to the browser's voice.
+ * onStart fires when sound begins (the button shows a loading state until then).
+ */
+export function speak(text: string, language: AssistantLanguage, onEnd?: () => void, onStart?: () => void): boolean {
+  stopSpeaking();
+  const parts = pieces(text);
+  if (parts.length === 0) return false;
+  // Created inside the click, so browsers that need a tap to play sound allow every piece.
+  const s: Session = { stop: new AbortController(), audio: new Audio(), urls: [] };
+  session = s;
+  void playFromServer(parts, language, s, onStart).then((played) => {
+    if (played === null) return; // stopped by the user
+    if (session === s) stopServerAudio();
+    const rest = parts.slice(played).join(" ");
+    if (!rest || !speakInBrowser(rest, language, onEnd, played === 0 ? onStart : undefined)) onEnd?.();
+  });
+  return true;
 }
 
 function browserCanSpeak(language: AssistantLanguage): boolean {
@@ -161,25 +267,14 @@ function browserCanSpeak(language: AssistantLanguage): boolean {
   return language === "en" || Boolean(findVoice(language));
 }
 
-/**
- * Reads text aloud with the server voice, falling back to the browser's voice.
- * Returns false when no voice is available at all.
- */
-export function speak(text: string, language: AssistantLanguage, onEnd?: () => void): boolean {
-  stopSpeaking();
-  void playFromServer(text, language, onEnd).then((played) => {
-    if (!played && !speakInBrowser(text, language, onEnd)) onEnd?.();
-  });
-  return true;
-}
-
-function speakInBrowser(text: string, language: AssistantLanguage, onEnd?: () => void): boolean {
+function speakInBrowser(text: string, language: AssistantLanguage, onEnd?: () => void, onStart?: () => void): boolean {
   if (!browserCanSpeak(language)) return false;
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = SPEECH_LANG[language];
   const voice = findVoice(language);
   if (voice) utterance.voice = voice;
+  utterance.onstart = () => onStart?.();
   utterance.onend = () => onEnd?.();
   utterance.onerror = () => onEnd?.();
   window.speechSynthesis.speak(utterance);
