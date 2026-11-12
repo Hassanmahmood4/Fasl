@@ -1,4 +1,4 @@
-# Notebooks (run on Kaggle/Colab with a GPU). The API has its own list in api/requirements.txt.
+# Notebooks (run on Kaggle/Colab with a GPU). The API lists its own dependencies in ml/pyproject.toml.
 torch>=2.2
 torchvision>=0.17
 timm>=0.9

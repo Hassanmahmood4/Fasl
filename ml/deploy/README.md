@@ -20,6 +20,7 @@ This folder holds the files for a Docker Space that serves `ml/api`.
    ml/api/                -> api/
    ml/config/             -> config/
    ml/models/             -> models/        (fasl_wheat.onnx, tracked with git lfs)
+   ml/pyproject.toml      -> pyproject.toml
    ```
 
 3. In the Space settings, add the variable `ALLOWED_ORIGINS` with the website's address.
@@ -29,6 +30,6 @@ This folder holds the files for a Docker Space that serves `ml/api`.
 ## Check it
 
 ```bash
-curl https://<user>-<space>.hf.space/health
-curl -F image=@wheat.jpg https://<user>-<space>.hf.space/predict
+curl https://<user>-<space>.hf.space/api/health
+curl -F image=@wheat.jpg https://<user>-<space>.hf.space/api/predict
 ```

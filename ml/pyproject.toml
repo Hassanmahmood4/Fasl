@@ -1,0 +1,20 @@
+# The model API (ml/api). Vercel deploys this folder as the "api" service (see vercel.json),
+# so the model in models/ and the labels in config/ ship with it.
+# Notebook dependencies are separate, in notebooks/requirements.txt.
+[project]
+name = "fasl-api"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.29",
+  "python-multipart>=0.0.9",
+  "onnxruntime>=1.17",
+  "numpy>=1.26",
+  "pillow>=10.2",
+  "groq>=0.11",
+  "edge-tts>=7.0",
+]
+
+[tool.vercel]
+entrypoint = "api.main:app"
