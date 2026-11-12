@@ -63,7 +63,7 @@ export function ReportBlocks({ report }: { report: Report }) {
       </Block>
 
       <Block title="Growth stage" className="md:order-3 md:col-span-2">
-        <ol className="grid grid-cols-5 gap-1">
+        <ol className="grid grid-cols-4 gap-1">
           {STAGES.map((name, index) => {
             const current = index + 1 === stage.index;
             return (

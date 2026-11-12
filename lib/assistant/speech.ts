@@ -105,15 +105,85 @@ function findVoice(language: AssistantLanguage): SpeechSynthesisVoice | undefine
     .find((voice) => voice.lang.toLowerCase().startsWith(prefix));
 }
 
-/** Whether this device can read replies aloud in the language. */
-export function canSpeak(language: AssistantLanguage): boolean {
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const TTS_TIMEOUT_MS = 20_000;
+
+/* Server voice: the same female Urdu voice (ur-PK-UzmaNeural) as the report audio. */
+let current: { audio: HTMLAudioElement; url: string; abort: AbortController } | null = null;
+
+function stopServerAudio() {
+  if (!current) return;
+  current.abort.abort();
+  current.audio.pause();
+  URL.revokeObjectURL(current.url);
+  current = null;
+}
+
+async function playFromServer(text: string, language: AssistantLanguage, onEnd?: () => void): Promise<boolean> {
+  const abort = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    abort.abort();
+  }, TTS_TIMEOUT_MS);
+  current = { audio: new Audio(), url: "", abort }; // lets stopSpeaking() cancel the download
+  try {
+    const response = await fetch(new URL("/tts", API_URL), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, language }),
+      signal: abort.signal,
+    });
+    if (!response.ok) return false;
+    const blob = await response.blob();
+    if (current?.abort !== abort) return true; // stopped while downloading
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    current = { audio, url, abort };
+    const done = () => {
+      if (current?.audio === audio) stopServerAudio();
+      onEnd?.();
+    };
+    audio.onended = done;
+    audio.onerror = done;
+    await audio.play();
+    return true;
+  } catch {
+    // Stopped by the user: nothing more to do. Network error or timeout: let the caller fall back.
+    return abort.signal.aborted && !timedOut;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function browserCanSpeak(language: AssistantLanguage): boolean {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return false;
   return language === "en" || Boolean(findVoice(language));
 }
 
-/** Reads text aloud. Returns false when there's no voice for the language. */
+/** Whether replies can be read aloud in the language. */
+export function canSpeak(language: AssistantLanguage): boolean {
+  return Boolean(API_URL) || browserCanSpeak(language);
+}
+
+/**
+ * Reads text aloud with the server voice, falling back to the browser's voice.
+ * Returns false when no voice is available at all.
+ */
 export function speak(text: string, language: AssistantLanguage, onEnd?: () => void): boolean {
   if (!canSpeak(language)) return false;
+  stopSpeaking();
+  if (API_URL) {
+    void playFromServer(text, language, onEnd).then((played) => {
+      if (!played && !speakInBrowser(text, language, onEnd)) onEnd?.();
+    });
+    return true;
+  }
+  return speakInBrowser(text, language, onEnd);
+}
+
+function speakInBrowser(text: string, language: AssistantLanguage, onEnd?: () => void): boolean {
+  if (!browserCanSpeak(language)) return false;
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = SPEECH_LANG[language];
@@ -126,5 +196,6 @@ export function speak(text: string, language: AssistantLanguage, onEnd?: () => v
 }
 
 export function stopSpeaking() {
+  stopServerAudio();
   if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
 }

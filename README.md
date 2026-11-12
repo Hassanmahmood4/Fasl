@@ -35,7 +35,7 @@ Open http://localhost:3000.
 }
 ```
 
-- `stage.index` counts from 1: Tillering, Booting, Heading, Grain filling, Ripe.
+- `stage.index` counts from 1: Vegetative, Flowering, Grain filling, Ripening.
 - `urduAudioUrl` may be relative to the service. Without it, the audio button is disabled.
 - Return `{ "status": "unclear" }` for a photo the model can't read. Any confidence below 0.6 also shows the "Photo unclear" screen.
 - Requests time out after 30 seconds.

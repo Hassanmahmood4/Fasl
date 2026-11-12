@@ -1,6 +1,6 @@
 import type { Report } from "./types";
 
-export const STAGES = ["Tillering", "Booting", "Heading", "Grain filling", "Ripe"];
+export const STAGES = ["Vegetative", "Flowering", "Grain filling", "Ripening"];
 
 const MIN_CONFIDENCE = 0.6;
 
