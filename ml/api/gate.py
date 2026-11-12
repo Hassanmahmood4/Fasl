@@ -7,13 +7,16 @@ Retraining with varied not_wheat photos is the real fix; see ml/README.md.
 """
 
 import io
+import os
 from dataclasses import dataclass
 
 import cv2
 import numpy as np
 from PIL import Image, ImageOps
 
-MIN_SIDE = 200          # pixels on the short side; the model reads 224x224
+# Pixels on the short side. 200 suits the v0.1 model; after retraining with cheap-phone
+# copies (v0.2), set FASL_MIN_SIDE=112 so photos from basic phones are accepted.
+MIN_SIDE = int(os.getenv("FASL_MIN_SIDE", "200"))
 BLUR_MIN = 15.0         # Laplacian variance, same limit as the cleaning notebook
 MIN_PLANT_COLOUR = 0.25 # share of pixels with green-to-golden plant colours
 
