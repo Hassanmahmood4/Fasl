@@ -43,7 +43,7 @@ export function ReportPanel({ report, photo, isSample, focusRef, action, compact
         )}
       </div>
 
-      <div className="grid gap-8 p-5 sm:p-8 lg:grid-cols-[minmax(0,4fr)_minmax(0,9fr)] lg:gap-8 lg:p-7 short:gap-5 short:p-4">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-8 p-5 sm:p-8 lg:grid-cols-[minmax(0,4fr)_minmax(0,9fr)] lg:gap-8 lg:p-7 short:gap-5 short:p-4">
         <div className="lg:sticky lg:top-8 lg:self-start">
           <div className="aspect-[4/3] overflow-hidden rounded-2xl">
             {/* eslint-disable-next-line @next/next/no-img-element -- may be a blob: upload */}
