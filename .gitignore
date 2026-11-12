@@ -40,3 +40,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# ML: datasets, checkpoints and local environments
+fasl_clean/
+ml/data/
+ml/**/*.jpg
+ml/**/*.jpeg
+ml/**/*.png
+*.pt
+*.pth
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/

@@ -1,48 +1,302 @@
 {
-  "placeholder": true,
-  "summary": { "accuracy": 0.5, "f1": 0.5, "images": 0, "classes": 9, "latency_ms": 0 },
+  "model_version": "fasl-wheat-v0.1",
+  "summary": {
+    "accuracy": 0.9671,
+    "f1": 0.9417,
+    "images": 7317,
+    "classes": 12,
+    "latency_ms": 20.1
+  },
   "history": [
-    { "epoch": 1, "train_acc": 0.3, "val_acc": 0.28, "train_loss": 1.6, "val_loss": 1.7 },
-    { "epoch": 2, "train_acc": 0.36, "val_acc": 0.33, "train_loss": 1.4, "val_loss": 1.5 },
-    { "epoch": 3, "train_acc": 0.41, "val_acc": 0.37, "train_loss": 1.25, "val_loss": 1.35 },
-    { "epoch": 4, "train_acc": 0.45, "val_acc": 0.41, "train_loss": 1.12, "val_loss": 1.24 },
-    { "epoch": 5, "train_acc": 0.49, "val_acc": 0.44, "train_loss": 1.02, "val_loss": 1.16 },
-    { "epoch": 6, "train_acc": 0.52, "val_acc": 0.46, "train_loss": 0.94, "val_loss": 1.1 },
-    { "epoch": 7, "train_acc": 0.55, "val_acc": 0.48, "train_loss": 0.87, "val_loss": 1.05 },
-    { "epoch": 8, "train_acc": 0.57, "val_acc": 0.49, "train_loss": 0.81, "val_loss": 1.02 },
-    { "epoch": 9, "train_acc": 0.59, "val_acc": 0.5, "train_loss": 0.76, "val_loss": 1.0 },
-    { "epoch": 10, "train_acc": 0.6, "val_acc": 0.5, "train_loss": 0.72, "val_loss": 0.99 }
+    {
+      "epoch": 1,
+      "train_acc": 0.6911,
+      "val_acc": 0.8688,
+      "train_loss": 1.6687,
+      "val_loss": 1.2237
+    },
+    {
+      "epoch": 2,
+      "train_acc": 0.8751,
+      "val_acc": 0.9378,
+      "train_loss": 1.094,
+      "val_loss": 1.0906
+    },
+    {
+      "epoch": 3,
+      "train_acc": 0.9187,
+      "val_acc": 0.9384,
+      "train_loss": 0.9986,
+      "val_loss": 1.0424
+    },
+    {
+      "epoch": 4,
+      "train_acc": 0.9488,
+      "val_acc": 0.9598,
+      "train_loss": 0.9396,
+      "val_loss": 1.0227
+    },
+    {
+      "epoch": 5,
+      "train_acc": 0.9586,
+      "val_acc": 0.9612,
+      "train_loss": 0.9162,
+      "val_loss": 0.9836
+    },
+    {
+      "epoch": 6,
+      "train_acc": 0.9696,
+      "val_acc": 0.9625,
+      "train_loss": 0.8822,
+      "val_loss": 0.9851
+    },
+    {
+      "epoch": 7,
+      "train_acc": 0.9781,
+      "val_acc": 0.9652,
+      "train_loss": 0.8637,
+      "val_loss": 0.9865
+    },
+    {
+      "epoch": 8,
+      "train_acc": 0.9802,
+      "val_acc": 0.9685,
+      "train_loss": 0.8593,
+      "val_loss": 0.9598
+    },
+    {
+      "epoch": 9,
+      "train_acc": 0.9845,
+      "val_acc": 0.9712,
+      "train_loss": 0.8465,
+      "val_loss": 0.962
+    },
+    {
+      "epoch": 10,
+      "train_acc": 0.9848,
+      "val_acc": 0.9726,
+      "train_loss": 0.8383,
+      "val_loss": 0.9557
+    },
+    {
+      "epoch": 11,
+      "train_acc": 0.9874,
+      "val_acc": 0.9746,
+      "train_loss": 0.8363,
+      "val_loss": 0.9541
+    },
+    {
+      "epoch": 12,
+      "train_acc": 0.9888,
+      "val_acc": 0.9705,
+      "train_loss": 0.8274,
+      "val_loss": 0.9548
+    },
+    {
+      "epoch": 13,
+      "train_acc": 0.9924,
+      "val_acc": 0.9739,
+      "train_loss": 0.8267,
+      "val_loss": 0.9529
+    },
+    {
+      "epoch": 14,
+      "train_acc": 0.9897,
+      "val_acc": 0.9726,
+      "train_loss": 0.8304,
+      "val_loss": 0.952
+    },
+    {
+      "epoch": 15,
+      "train_acc": 0.9892,
+      "val_acc": 0.9739,
+      "train_loss": 0.8266,
+      "val_loss": 0.9524
+    }
   ],
   "confusion": {
     "disease": {
-      "labels": ["Healthy", "Leaf rust", "Yellow rust", "Powdery mildew"],
+      "labels": [
+        "Healthy",
+        "Brown rust",
+        "Yellow rust",
+        "Stem rust",
+        "Septoria",
+        "Loose smut",
+        "Powdery mildew",
+        "Not wheat"
+      ],
       "matrix": [
-        [5, 2, 2, 1],
-        [2, 5, 2, 1],
-        [2, 2, 5, 1],
-        [1, 2, 2, 5]
+        [
+          357,
+          1,
+          2,
+          3,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          1,
+          161,
+          0,
+          4,
+          1,
+          0,
+          2,
+          0
+        ],
+        [
+          13,
+          0,
+          446,
+          2,
+          0,
+          0,
+          2,
+          0
+        ],
+        [
+          1,
+          3,
+          0,
+          37,
+          2,
+          2,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          65,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          0,
+          37,
+          1,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          4,
+          0,
+          1,
+          118,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          221
+        ]
       ]
     },
     "stage": {
-      "labels": ["Tillering", "Booting", "Heading", "Grain filling", "Ripe"],
+      "labels": [
+        "Vegetative",
+        "Flowering",
+        "Grain filling",
+        "Ripening"
+      ],
       "matrix": [
-        [5, 2, 1, 1, 1],
-        [2, 5, 1, 1, 1],
-        [1, 2, 5, 1, 1],
-        [1, 1, 2, 5, 1],
-        [1, 1, 1, 2, 5]
+        [
+          2,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          9,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          19,
+          7
+        ],
+        [
+          0,
+          0,
+          0,
+          34
+        ]
       ]
     }
   },
   "per_class": [
-    { "label": "Healthy", "precision": 0.5, "recall": 0.5, "f1": 0.5 },
-    { "label": "Leaf rust", "precision": 0.5, "recall": 0.5, "f1": 0.5 },
-    { "label": "Yellow rust", "precision": 0.5, "recall": 0.5, "f1": 0.5 },
-    { "label": "Powdery mildew", "precision": 0.5, "recall": 0.5, "f1": 0.5 },
-    { "label": "Tillering", "precision": 0.5, "recall": 0.5, "f1": 0.5 },
-    { "label": "Booting", "precision": 0.5, "recall": 0.5, "f1": 0.5 },
-    { "label": "Heading", "precision": 0.5, "recall": 0.5, "f1": 0.5 },
-    { "label": "Grain filling", "precision": 0.5, "recall": 0.5, "f1": 0.5 },
-    { "label": "Ripe", "precision": 0.5, "recall": 0.5, "f1": 0.5 }
-  ]
+    {
+      "label": "Healthy",
+      "precision": 0.9571,
+      "recall": 0.9808,
+      "f1": 0.9688
+    },
+    {
+      "label": "Brown rust",
+      "precision": 0.9758,
+      "recall": 0.9527,
+      "f1": 0.9641
+    },
+    {
+      "label": "Yellow rust",
+      "precision": 0.9955,
+      "recall": 0.9633,
+      "f1": 0.9791
+    },
+    {
+      "label": "Stem rust",
+      "precision": 0.7115,
+      "recall": 0.8222,
+      "f1": 0.7629
+    },
+    {
+      "label": "Septoria",
+      "precision": 0.9559,
+      "recall": 0.9848,
+      "f1": 0.9701
+    },
+    {
+      "label": "Loose smut",
+      "precision": 0.925,
+      "recall": 0.9487,
+      "f1": 0.9367
+    },
+    {
+      "label": "Powdery mildew",
+      "precision": 0.9516,
+      "recall": 0.9516,
+      "f1": 0.9516
+    },
+    {
+      "label": "Not wheat",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    }
+  ],
+  "stage_summary": {
+    "accuracy": 0.9014,
+    "f1": 0.9378,
+    "test_images": 71
+  }
 }
