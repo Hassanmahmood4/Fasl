@@ -1,0 +1,32 @@
+{
+  "crop": "wheat",
+  "model_version": "fasl-wheat-v0.1",
+  "image_size": 224,
+  "mean": [
+    0.485,
+    0.456,
+    0.406
+  ],
+  "std": [
+    0.229,
+    0.224,
+    0.225
+  ],
+  "growth_stage": [
+    "vegetative",
+    "flowering",
+    "grain_filling",
+    "ripening"
+  ],
+  "health": [
+    "healthy",
+    "brown_rust",
+    "yellow_rust",
+    "stem_rust",
+    "septoria",
+    "loose_smut",
+    "powdery_mildew",
+    "not_wheat"
+  ],
+  "confidence_threshold": 0.6
+}
