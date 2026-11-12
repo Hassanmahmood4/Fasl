@@ -14,9 +14,10 @@ ml/
   metrics/training_metrics.json # raw export from 02_train.ipynb
   scripts/to_web_metrics.py     # converts it to public/metrics.json (the shape in lib/metrics.ts)
   schemas/report.schema.json    # /predict response, mirrors lib/demo/types.ts
-  api/                          # FastAPI: GET /health, POST /predict
+  api/                          # FastAPI, all routes under /api: health, predict, chat, tts, audio
   deploy/                       # Hugging Face Space (Docker) files
-  requirements.txt              # notebook dependencies
+  pyproject.toml                # API dependencies (also read by Vercel)
+  notebooks/requirements.txt    # notebook dependencies
 ```
 
 Datasets and the cleaned image folder (`fasl_clean/`) are not committed. The notebooks run on Kaggle
@@ -38,14 +39,23 @@ with the source datasets attached; the list of sources is in `metrics/training_m
 From the repo root:
 
 ```bash
-pip install -r ml/api/requirements.txt
+uv pip install -r ml/pyproject.toml   # pip cannot read pyproject.toml directly
 uvicorn ml.api.main:app --reload --port 8000
 ```
 
-Then set `NEXT_PUBLIC_API_URL=http://localhost:8000` in `.env.local`.
+Then set `NEXT_PUBLIC_API_URL=http://localhost:8000` in `.env.local` and run `npm run dev`.
 `ALLOWED_ORIGINS` (comma-separated) controls CORS; it defaults to `http://localhost:3000`.
+The chat assistant needs `GROQ_API_KEY`.
 
-`POST /predict` returns `{"status": "unclear", ...}` when the photo is not wheat or either head is
+Or run the site and the API together, the way Vercel does, with `vercel dev` (no `.env.local` needed).
+
+## Deploy on Vercel
+
+`vercel.json` deploys one project with two services on one domain: the Next.js site (`web`) and this
+API (`api`, folder `ml/`), with every `/api/*` request routed to the API. Add `GROQ_API_KEY` in the
+Vercel project's environment variables; `NEXT_PUBLIC_API_URL` and `ALLOWED_ORIGINS` are not needed.
+
+`POST /api/predict` returns `{"status": "unclear", ...}` when the photo is not wheat or either head is
 below the 0.6 confidence threshold. Otherwise it returns the Report shape. The model does not predict
 severity, lesion location or days to harvest, so those fields are left out; `readiness.ready` is true
 only for the ripening stage.
