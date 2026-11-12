@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { apiUrl } from "@/lib/apiUrl";
 import type { AssistantLanguage } from "./api";
 
 /** Browser speech codes for each language. */
@@ -105,7 +106,6 @@ function findVoice(language: AssistantLanguage): SpeechSynthesisVoice | undefine
     .find((voice) => voice.lang.toLowerCase().startsWith(prefix));
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const TTS_TIMEOUT_MS = 20_000;
 
 /* Server voice: the same female Urdu voice (ur-PK-UzmaNeural) as the report audio. */
@@ -128,7 +128,7 @@ async function playFromServer(text: string, language: AssistantLanguage, onEnd?:
   }, TTS_TIMEOUT_MS);
   current = { audio: new Audio(), url: "", abort }; // lets stopSpeaking() cancel the download
   try {
-    const response = await fetch(new URL("/tts", API_URL), {
+    const response = await fetch(apiUrl("/tts"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text, language }),
@@ -161,25 +161,16 @@ function browserCanSpeak(language: AssistantLanguage): boolean {
   return language === "en" || Boolean(findVoice(language));
 }
 
-/** Whether replies can be read aloud in the language. */
-export function canSpeak(language: AssistantLanguage): boolean {
-  return Boolean(API_URL) || browserCanSpeak(language);
-}
-
 /**
  * Reads text aloud with the server voice, falling back to the browser's voice.
  * Returns false when no voice is available at all.
  */
 export function speak(text: string, language: AssistantLanguage, onEnd?: () => void): boolean {
-  if (!canSpeak(language)) return false;
   stopSpeaking();
-  if (API_URL) {
-    void playFromServer(text, language, onEnd).then((played) => {
-      if (!played && !speakInBrowser(text, language, onEnd)) onEnd?.();
-    });
-    return true;
-  }
-  return speakInBrowser(text, language, onEnd);
+  void playFromServer(text, language, onEnd).then((played) => {
+    if (!played && !speakInBrowser(text, language, onEnd)) onEnd?.();
+  });
+  return true;
 }
 
 function speakInBrowser(text: string, language: AssistantLanguage, onEnd?: () => void): boolean {

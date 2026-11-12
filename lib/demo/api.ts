@@ -1,6 +1,6 @@
+import { apiLink, apiUrl } from "@/lib/apiUrl";
 import type { AnalysisResult, Report } from "./types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const TIMEOUT_MS = 30_000;
 const HEALTH_TIMEOUT_MS = 8_000;
 
@@ -28,15 +28,34 @@ function isReport(value: unknown): value is Report {
   );
 }
 
-function absolute(url: string | undefined, base: string): string | undefined {
-  return url ? new URL(url, base).href : undefined;
+/** Longest side sent to the model. It only needs 224px, and Vercel caps request bodies at 4.5 MB. */
+const MAX_SIDE = 1600;
+
+/** Shrinks big phone photos before upload. Falls back to the original file if the browser can't. */
+async function shrink(file: File): Promise<Blob> {
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
+    if (scale === 1 && file.size < 2_000_000) {
+      bitmap.close();
+      return file;
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.9));
+    return blob ?? file;
+  } catch {
+    return file;
+  }
 }
 
 /** Whether the model service answers. Never throws. */
 export async function checkModel(): Promise<boolean> {
-  if (!API_URL) return false;
   try {
-    const response = await fetch(new URL("/health", API_URL), {
+    const response = await fetch(apiUrl("/health"), {
       signal: AbortSignal.timeout(HEALTH_TIMEOUT_MS),
     });
     return response.ok;
@@ -46,14 +65,12 @@ export async function checkModel(): Promise<boolean> {
 }
 
 export async function predict(file: File): Promise<AnalysisResult> {
-  if (!API_URL) throw new PredictError(UNREACHABLE);
-
   const body = new FormData();
-  body.append("image", file);
+  body.append("image", await shrink(file), file.name.replace(/\.\w+$/, "") + ".jpg");
 
   let data: unknown;
   try {
-    const response = await fetch(new URL("/predict", API_URL), {
+    const response = await fetch(apiUrl("/predict"), {
       method: "POST",
       body,
       signal: AbortSignal.timeout(TIMEOUT_MS),
@@ -71,8 +88,8 @@ export async function predict(file: File): Promise<AnalysisResult> {
     kind: "report",
     report: {
       ...data,
-      heatmapUrl: absolute(data.heatmapUrl, API_URL),
-      urduAudioUrl: absolute(data.urduAudioUrl, API_URL),
+      heatmapUrl: apiLink(data.heatmapUrl),
+      urduAudioUrl: apiLink(data.urduAudioUrl),
     },
   };
 }

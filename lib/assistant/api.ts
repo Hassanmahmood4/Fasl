@@ -1,3 +1,4 @@
+import { apiUrl } from "@/lib/apiUrl";
 import type { Report } from "@/lib/demo/types";
 
 export type AssistantLanguage = "en" | "ur";
@@ -8,7 +9,6 @@ export type ChatTurn = {
   language: AssistantLanguage;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const TIMEOUT_MS = 30_000;
 
 export class AssistantError extends Error {}
@@ -20,7 +20,7 @@ const FAILED = "The assistant couldn’t answer right now. Please try again.";
  * Sends a question about the current report to the chatbot backend.
  *
  * Backend contract (built separately):
- *   POST {NEXT_PUBLIC_API_URL}/chat
+ *   POST /api/chat (see lib/apiUrl.ts)
  *   body:     { message: string, language: "en" | "ur", report: Report, history: ChatTurn[] }
  *   response: { reply: string }
  * The reply should be in the language given, Urdu in Urdu script.
@@ -31,11 +31,9 @@ export async function askAssistant(
   report: Report,
   history: ChatTurn[],
 ): Promise<string> {
-  if (!API_URL) throw new AssistantError(NOT_CONNECTED);
-
   let response: Response;
   try {
-    response = await fetch(new URL("/chat", API_URL), {
+    response = await fetch(apiUrl("/chat"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message, language, report, history }),

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Mic, MicOff, Send, Square, Volume2 } from "lucide-react";
 import { AssistantError, askAssistant, type AssistantLanguage, type ChatTurn } from "@/lib/assistant/api";
-import { canSpeak, speak, stopSpeaking, useSpeechInput } from "@/lib/assistant/speech";
+import { speak, stopSpeaking, useSpeechInput } from "@/lib/assistant/speech";
 import type { Report } from "@/lib/demo/types";
 
 const COPY: Record<AssistantLanguage, { placeholder: string; hint: string; thinking: string }> = {
@@ -135,7 +135,7 @@ export function CropAssistant({ report }: { report: Report }) {
                 <span className="sr-only">{mine ? "You: " : "Assistant: "}</span>
                 {turn.text}
               </p>
-              {!mine && canSpeak(turn.language) && (
+              {!mine && (
                 <button
                   type="button"
                   onClick={() => toggleSpeech(index, turn)}
