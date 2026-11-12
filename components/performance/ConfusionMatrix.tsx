@@ -32,10 +32,10 @@ export function ConfusionMatrix({ confusion }: { confusion: Metrics["confusion"]
         tabIndex={0}
         role="region"
         aria-label="Confusion matrix table"
-        className="overflow-x-auto px-3 py-4 sm:px-5 lg:py-5 short:py-2"
+        className="overflow-x-auto px-2 py-4 sm:px-5 lg:py-5 short:py-2"
       >
         <table
-          className="w-full min-w-[420px] table-fixed border-separate border-spacing-1 text-center text-xs tabular-nums sm:text-caption lg:min-w-0"
+          className="w-full min-w-[300px] table-fixed border-separate border-spacing-0.5 text-center text-[0.6875rem] tabular-nums sm:border-spacing-1 sm:text-caption"
           style={{ "--rows": matrix.length } as CSSProperties}
         >
           <caption className="sr-only">
@@ -44,10 +44,13 @@ export function ConfusionMatrix({ confusion }: { confusion: Metrics["confusion"]
           </caption>
           <thead>
             <tr>
-              <td className="w-24" />
+              <td className="w-[4.25rem] sm:w-24" />
               {labels.map((label) => (
-                <th key={label} scope="col" className="px-0.5 pb-1 align-bottom leading-tight font-semibold">
-                  {label}
+                <th key={label} scope="col" className="px-0 pb-1 align-bottom leading-tight font-semibold sm:px-0.5">
+                  {/* Many narrow columns on phones: labels run sideways instead of breaking mid-word. */}
+                  <span className={labels.length > 5 ? "inline-block max-sm:h-[7.25em] max-sm:rotate-180 max-sm:text-left max-sm:whitespace-nowrap max-sm:[writing-mode:vertical-rl]" : undefined}>
+                    {label}
+                  </span>
                 </th>
               ))}
             </tr>
@@ -66,7 +69,7 @@ export function ConfusionMatrix({ confusion }: { confusion: Metrics["confusion"]
                       <td
                         key={labels[columnIndex]}
                         title={`True ${labels[rowIndex]}, predicted ${labels[columnIndex]}: ${count} (${share}%)`}
-                        className="h-11 font-semibold text-black lg:h-[clamp(1.75rem,calc((100svh-15rem)/var(--rows)),5.5rem)]"
+                        className="h-9 font-semibold sm:h-11 text-black lg:h-[clamp(1.75rem,calc((100svh-15rem)/var(--rows)),5.5rem)]"
                         style={{ backgroundColor: shade(share) }}
                       >
                         {share}%
