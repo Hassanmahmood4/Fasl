@@ -14,7 +14,7 @@ type View =
   | { name: "choose" }
   | { name: "analysing"; photo: Photo }
   | { name: "report"; photo: Photo; report: Report; isSample: boolean }
-  | { name: "unclear"; photo: Photo };
+  | { name: "unclear"; photo: Photo; message?: string };
 
 const GENERIC_ERROR =
   "Something went wrong reading that photo. Try one of the sample photos instead.";
@@ -50,7 +50,7 @@ export function ScanDashboard() {
         if (outcome.kind === "report" && !isLowConfidence(outcome.report)) {
           setView({ name: "report", photo, report: outcome.report, isSample });
         } else {
-          setView({ name: "unclear", photo });
+          setView({ name: "unclear", photo, message: outcome.kind === "unclear" ? outcome.message : undefined });
         }
       } catch (caught) {
         if (run !== latestRun.current) return;
@@ -147,7 +147,7 @@ export function ScanDashboard() {
           />
           <div>
             <h2 className="font-display text-heading font-black">
-              Photo unclear. Retake it closer, in daylight, with the crop filling the frame.
+              {view.message ?? "Photo unclear. Retake it closer, in daylight, with the crop filling the frame."}
             </h2>
             <button
               type="button"

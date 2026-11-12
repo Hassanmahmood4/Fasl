@@ -18,7 +18,7 @@ export type Report = {
 
 export type AnalysisResult =
   | { kind: "report"; report: Report }
-  | { kind: "unclear" };
+  | { kind: "unclear"; message?: string };
 
 export type Photo = {
   src: string;

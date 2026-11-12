@@ -64,7 +64,9 @@ export async function predict(file: File): Promise<AnalysisResult> {
     throw new PredictError(UNREACHABLE);
   }
 
-  if (isRecord(data) && data.status === "unclear") return { kind: "unclear" };
+  if (isRecord(data) && data.status === "unclear") {
+    return { kind: "unclear", message: typeof data.message === "string" ? data.message : undefined };
+  }
   if (!isReport(data)) throw new PredictError(UNREACHABLE);
 
   return {

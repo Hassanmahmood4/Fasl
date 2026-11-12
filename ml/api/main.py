@@ -11,7 +11,7 @@ from PIL import UnidentifiedImageError
 
 from .chat import router as chat_router
 from .model import WheatModel
-from . import tts
+from . import gate, tts
 from .report import build_report, urdu_summary
 
 MAX_BYTES = 10 * 1024 * 1024
@@ -41,6 +41,9 @@ async def predict(image: UploadFile = File(...)) -> dict:
     if len(data) > MAX_BYTES:
         raise HTTPException(status_code=413, detail="Image is larger than 10 MB.")
     try:
+        rejected = gate.check(data)
+        if rejected:
+            return {"status": "unclear", "reason": rejected.reason, "message": rejected.message}
         stage, health_head = model.predict(data)
     except (UnidentifiedImageError, OSError):
         raise HTTPException(status_code=400, detail="File is not a readable image.")
