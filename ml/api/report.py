@@ -4,7 +4,12 @@ The model decides the facts; this module only phrases them. Severity, location
 and days-to-harvest are not predicted by the model, so they are left out.
 """
 
-from .model import Head
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:  # avoid loading the model code just to phrase a report
+    from .model import Head
 
 STAGE_NAMES = {
     "vegetative": "Vegetative",

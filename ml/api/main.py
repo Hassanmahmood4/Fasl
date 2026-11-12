@@ -4,13 +4,14 @@
 """
 
 import os
+from functools import lru_cache
 
 from fastapi import APIRouter, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import UnidentifiedImageError
 
 from .chat import router as chat_router
-from .model import WheatModel
+from .model import WheatModel, load_config
 from . import tts
 from .report import build_report, urdu_summary
 
@@ -26,12 +27,18 @@ api = APIRouter(prefix="/api")
 api.include_router(chat_router)
 api.include_router(tts.router)
 
-model = WheatModel()
+CONFIG = load_config()
+
+
+@lru_cache(maxsize=1)
+def get_model() -> WheatModel:
+    """Loads the 32 MB model on the first scan, so chat and voice requests start fast."""
+    return WheatModel()
 
 
 @api.get("/health")
 def health() -> dict:
-    return {"ok": True, "model_version": model.config["model_version"]}
+    return {"ok": True, "model_version": CONFIG["model_version"]}
 
 
 @api.post("/predict")
@@ -41,6 +48,7 @@ async def predict(image: UploadFile = File(...)) -> dict:
         raise HTTPException(status_code=400, detail="Empty upload.")
     if len(data) > MAX_BYTES:
         raise HTTPException(status_code=413, detail="Image is larger than 10 MB.")
+    model = get_model()
     try:
         stage, health_head = model.predict(data)
     except (UnidentifiedImageError, OSError):

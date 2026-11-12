@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
-import onnxruntime as ort
 from PIL import Image, ImageOps
 
 ML_DIR = Path(__file__).resolve().parents[1]
@@ -28,9 +27,16 @@ def softmax(x: np.ndarray) -> np.ndarray:
     return e / e.sum()
 
 
+def load_config() -> dict:
+    """Class order, image size and threshold. Cheap: does not load the model."""
+    return json.loads(LABELS_PATH.read_text(encoding="utf-8"))
+
+
 class WheatModel:
     def __init__(self) -> None:
-        self.config = json.loads(LABELS_PATH.read_text(encoding="utf-8"))
+        import onnxruntime as ort  # heavy; only needed once a photo is scanned
+
+        self.config = load_config()
         self.size = int(self.config["image_size"])
         self.mean = np.array(self.config["mean"], dtype=np.float32).reshape(3, 1, 1)
         self.std = np.array(self.config["std"], dtype=np.float32).reshape(3, 1, 1)
