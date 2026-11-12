@@ -30,13 +30,14 @@
   --text-section-small: clamp(2.25rem, 1.6rem + 3vw, 4rem);
   --text-section-small--line-height: 1.04;
   --text-section-small--letter-spacing: -0.025em;
-  --text-hero: clamp(2.875rem, 1.5rem + 6.4vw, 7rem);
+  /* Scales with width and height, so short screens (landscape phones) keep room for the field. */
+  --text-hero: clamp(2.25rem, min(1.5rem + 6.4vw, 1rem + 9svh), 7rem);
   --text-hero--line-height: 1.02;
   --text-hero--letter-spacing: -0.035em;
   --text-stat: clamp(1.5rem, 1.05rem + 1.1vw, 2rem);
   --text-stat--line-height: 1.1;
   /* Nastaliq sits small on its em box and needs tall lines for its diagonal. */
-  --text-urdu: clamp(2.5rem, 2rem + 2.4vw, 4.5rem);
+  --text-urdu: clamp(2rem, min(2rem + 2.4vw, 0.75rem + 6svh), 4.5rem);
   --text-urdu--line-height: 1.9;
 
   /* Rhythm: tight inside a group, generous between groups and sections. */
@@ -59,6 +60,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* Past 1920px the whole rem-based layout scales up, so big monitors see the desktop design enlarged rather than a small island. */
+  font-size: clamp(100%, 0.8333vw, 137.5%);
   font-kerning: normal;
   text-rendering: optimizeLegibility;
 }
