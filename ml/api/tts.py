@@ -1,23 +1,25 @@
 """Text-to-speech with Microsoft Edge neural voices (same voice as the sample clips).
 
-    POST /tts                 { text, language: "en" | "ur" } -> audio/mpeg
-    GET  /audio/{key}.mp3     report summary audio registered by /predict
+    POST /tts                      { text, language: "en" | "ur" } -> audio/mpeg
+    GET  /audio?language=&text=    the same, as a link (the report's urduAudioUrl)
+
+Serverless instances share no memory, so nothing here depends on an earlier request;
+the in-memory cache only saves repeat work on a warm instance.
 """
 
-import asyncio
 import hashlib
 from collections import OrderedDict
 from typing import Literal
+from urllib.parse import urlencode
 
 import edge_tts
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Query, Response
 from pydantic import BaseModel, Field
 
 VOICES = {"ur": "ur-PK-UzmaNeural", "en": "en-US-AriaNeural"}  # both female
 CACHE_SIZE = 256
 
 router = APIRouter()
-_texts: OrderedDict[str, tuple[str, str]] = OrderedDict()  # key -> (text, language)
 _audio: OrderedDict[str, bytes] = OrderedDict()  # key -> mp3
 
 
@@ -51,25 +53,9 @@ async def synthesize(text: str, language: str) -> bytes:
     return mp3
 
 
-_pending: dict[str, asyncio.Task] = {}
-
-
-async def _prepare(text: str, language: str) -> None:
-    try:
-        await synthesize(text, language)
-    except HTTPException:
-        pass  # GET /audio retries on demand
-
-
-def register(text: str, language: str) -> str:
-    """Remember text, start making its audio in the background, and return its relative URL."""
-    key = _key(text, language)
-    _remember(_texts, key, (text, language))
-    if key not in _audio and key not in _pending:
-        task = asyncio.get_running_loop().create_task(_prepare(text, language))
-        _pending[key] = task
-        task.add_done_callback(lambda _: _pending.pop(key, None))
-    return f"/audio/{key}.mp3"
+def audio_url(text: str, language: str) -> str:
+    """Relative URL that makes the audio on demand. It carries the text itself, so any server instance can answer it."""
+    return "/api/audio?" + urlencode({"language": language, "text": text})
 
 
 def _mp3(data: bytes) -> Response:
@@ -86,13 +72,9 @@ async def tts(req: TtsRequest) -> Response:
     return _mp3(await synthesize(req.text, req.language))
 
 
-@router.get("/audio/{key}.mp3")
-async def audio(key: str) -> Response:
-    if key in _pending:
-        await asyncio.shield(_pending[key])  # already being made: wait for it instead of starting again
-    if key in _audio:
-        return _mp3(_audio[key])
-    if key not in _texts:
-        raise HTTPException(status_code=404, detail="Audio expired. Scan the photo again.")
-    text, language = _texts[key]
+@router.get("/audio")
+async def audio(
+    text: str = Query(min_length=1, max_length=3000),
+    language: Literal["en", "ur"] = "ur",
+) -> Response:
     return _mp3(await synthesize(text, language))
