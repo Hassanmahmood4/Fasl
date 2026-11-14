@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import { useState } from "react";
 import { Tabs } from "@/components/shared/Tabs";
 import type { Metrics } from "@/lib/metrics";
 
@@ -36,7 +36,6 @@ export function ConfusionMatrix({ confusion }: { confusion: Metrics["confusion"]
       >
         <table
           className="w-full min-w-[300px] table-fixed border-separate border-spacing-0.5 text-center text-[0.6875rem] tabular-nums sm:border-spacing-1 sm:text-caption"
-          style={{ "--rows": matrix.length } as CSSProperties}
         >
           <caption className="sr-only">
             Rows are the true label, columns are the predicted label. Each cell shows the share of
@@ -69,7 +68,7 @@ export function ConfusionMatrix({ confusion }: { confusion: Metrics["confusion"]
                       <td
                         key={labels[columnIndex]}
                         title={`True ${labels[rowIndex]}, predicted ${labels[columnIndex]}: ${count} (${share}%)`}
-                        className="h-9 font-semibold sm:h-11 text-black lg:h-[clamp(1.75rem,calc((100svh-15rem)/var(--rows)),5.5rem)]"
+                        className="h-8 font-semibold text-black sm:h-10"
                         style={{ backgroundColor: shade(share) }}
                       >
                         {share}%
