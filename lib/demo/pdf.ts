@@ -12,6 +12,9 @@ const C = {
   charcoal: "#4A4A4A",
 };
 
+/* The live site, printed in the footer whichever address the report was saved from. */
+const SITE = "fasl-six.vercel.app";
+
 /* A4 in points. */
 const PAGE_W = 595.28;
 const PAGE_H = 841.89;
@@ -187,7 +190,7 @@ export async function downloadReportPdf(report: Report, photo: Photo, isSample: 
     );
     doc.addImage(icon, "PNG", M + 18, FOOTER_TOP + FOOTER_H + 8, 9, 9);
     font(7.5, "normal", C.charcoal);
-    doc.text(`Fasl, made in Pakistan · ${window.location.host}`, M + 31, FOOTER_TOP + FOOTER_H + 15);
+    doc.text(`Fasl, made in Pakistan · ${SITE}`, M + 31, FOOTER_TOP + FOOTER_H + 15);
     if (pages > 1) doc.text(`Page ${page} of ${pages}`, PAGE_W - M, FOOTER_TOP + FOOTER_H + 15, { align: "right" });
   };
 
