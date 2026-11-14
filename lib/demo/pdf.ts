@@ -1,4 +1,5 @@
 import type { jsPDF as JsPdf } from "jspdf";
+import { perforatedEdge, STAMP_HEIGHT, STAMP_WIDTH } from "@/components/footer/Stamp";
 import { healthLabel, percent, readinessLabel, STAGES } from "./report";
 import type { Photo, Report, Severity } from "./types";
 
@@ -126,6 +127,108 @@ async function urduMark(colour: string): Promise<Raster | null> {
   const trimmed = canvas(right - left + pad * 2, bottom - top + pad * 2);
   trimmed.ctx.drawImage(el, left - pad, top - pad, trimmed.el.width, trimmed.el.height, 0, 0, trimmed.el.width, trimmed.el.height);
   return { data: trimmed.el.toDataURL("image/png"), ratio: trimmed.el.height / trimmed.el.width };
+}
+
+function cssFont(name: string): string {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+/**
+ * The site footer's logo: wheat stamp, "Made in Pakistan" postmark and the فصل wordmark,
+ * drawn the same way as components/footer/Stamp.tsx. Returns null if a font or photo fails.
+ */
+async function stampLogo(): Promise<Raster | null> {
+  const figtree = cssFont("--font-figtree");
+  const nastaliq = cssFont("--font-nastaliq");
+  if (!figtree || !nastaliq) return null;
+  let photo: HTMLImageElement;
+  try {
+    [photo] = await Promise.all([
+      loadImage("/samples/wheat-ripe.jpg"),
+      document.fonts.load(`600 9px ${figtree}`),
+      document.fonts.load(`700 12px ${figtree}`),
+      document.fonts.load(`64px ${nastaliq}`, "فصل"),
+    ]);
+  } catch {
+    return null;
+  }
+
+  // Laid out in CSS pixels as on the site, drawn at 4x.
+  const S = 4;
+  const W = 356;
+  const H = 150;
+  const { el, ctx } = canvas(W * S, H * S);
+  ctx.scale(S, S);
+  const deg = Math.PI / 180;
+
+  // Stamp: 136px tall, tilted -3deg, with a soft drop shadow.
+  const k = 136 / (STAMP_HEIGHT + 12);
+  const stampW = (STAMP_WIDTH + 12) * k;
+  ctx.save();
+  ctx.translate(6 + stampW / 2, 7 + 68);
+  ctx.rotate(-3 * deg);
+  ctx.translate(-stampW / 2, -68);
+  ctx.scale(k, k);
+  ctx.translate(6, 6);
+  ctx.shadowColor = "rgba(90,64,20,0.22)";
+  ctx.shadowBlur = 6 * S;
+  ctx.shadowOffsetY = 3 * S;
+  ctx.fillStyle = C.white;
+  ctx.fill(new Path2D(perforatedEdge()));
+  ctx.shadowColor = "transparent";
+  ctx.beginPath();
+  ctx.roundRect(12, 12, STAMP_WIDTH - 24, STAMP_HEIGHT - 24, 2);
+  ctx.clip();
+  const winW = STAMP_WIDTH - 24;
+  const winH = STAMP_HEIGHT - 24;
+  const cover = Math.max(winW / photo.naturalWidth, winH / photo.naturalHeight);
+  const pw = photo.naturalWidth * cover;
+  const ph = photo.naturalHeight * cover;
+  ctx.drawImage(photo, 12 + (winW - pw) / 2, 12 + (winH - ph) / 2, pw, ph);
+  ctx.restore();
+
+  // Postmark: 112 x 62, tilted 9deg, charcoal at 80%.
+  ctx.save();
+  ctx.translate(6 + 96 + 56, 7 + 62 + 31);
+  ctx.rotate(9 * deg);
+  ctx.translate(-56, -31);
+  ctx.globalAlpha = 0.8;
+  ctx.strokeStyle = C.charcoal;
+  ctx.fillStyle = C.charcoal;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.roundRect(1.5, 1.5, 109, 59, 3);
+  ctx.stroke();
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(1.5, 20.5);
+  ctx.lineTo(110.5, 20.5);
+  ctx.moveTo(1.5, 41.5);
+  ctx.lineTo(110.5, 41.5);
+  ctx.stroke();
+  ctx.textAlign = "center";
+  const spaced = (text: string, font: string, spacing: number, x: number, y: number) => {
+    ctx.font = font;
+    ctx.letterSpacing = `${spacing}px`;
+    ctx.fillText(text, x + spacing / 2, y);
+  };
+  spaced("MADE IN", `600 9px ${figtree}`, 1.6, 56, 15);
+  spaced("PAKISTAN", `700 12px ${figtree}`, 1, 56, 35);
+  spaced("2026", `600 9px ${figtree}`, 1.6, 72, 55);
+  ctx.letterSpacing = "0px";
+  ctx.font = `9px ${nastaliq}`;
+  ctx.direction = "rtl";
+  ctx.fillText("فصل", 38, 54);
+  ctx.restore();
+
+  // Wordmark to the right, as in the footer.
+  ctx.font = `64px ${nastaliq}`;
+  ctx.direction = "rtl";
+  ctx.textAlign = "right";
+  ctx.fillStyle = C.black;
+  ctx.fillText("فصل", W - 6, 92);
+
+  return { data: el.toDataURL("image/png"), ratio: H / W };
 }
 
 function formatDate(date: Date): string {
