@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How Fasl fits together</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Figtree:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:  #F7EDD8;   /* wheat-tint */
+      --color-ink:    #121212;   /* black */
+      --color-muted:  #4A4A4A;   /* charcoal */
+      --color-accent: #835A1C;   /* bronze */
+      --font-sans:    'Figtree', system-ui, sans-serif;
+      --font-serif:   'Instrument Serif', serif;
+      --font-mono:    'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 960px; display: block; }
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Architecture · Fasl</p>
+    <h1>How Fasl fits together</h1>
+    <div class="diagram-container">
+      <svg viewBox="0 0 960 448" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fasl-architecture-title fasl-architecture-desc">
+        <title id="fasl-architecture-title">How Fasl fits together</title>
+        <desc id="fasl-architecture-desc">Architecture of Fasl: a field officer's browser loads the Next.js site, which calls the FastAPI model API on the same Vercel domain; the API runs the ONNX wheat model and calls Groq for chat and Edge TTS for speech.</desc>
+        <defs>
+<marker id="fasl-architecture-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4A4A4A"/></marker>
+<marker id="fasl-architecture-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#835A1C"/></marker>
+<marker id="fasl-architecture-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2F6B5E"/></marker>
+
+        </defs>
+        <rect width="100%" height="100%" fill="#F7EDD8"/>
+        <g transform="translate(0,-96)">
+
+<!-- Zone: both services share one Vercel domain -->
+<rect x="216" y="212" width="448" height="228" rx="8" fill="rgba(18,18,18,0.02)" stroke="rgba(18,18,18,0.10)" stroke-width="0.8"/>
+<rect x="228" y="216" width="112" height="12" rx="2" fill="#F7EDD8"/>
+<text x="284" y="225" fill="#5F5546" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.14em">VERCEL · ONE DOMAIN</text>
+
+<!-- Arrows (behind nodes) -->
+<line x1="168" y1="272" x2="240" y2="272" stroke="#4A4A4A" stroke-width="1.2" marker-end="url(#fasl-architecture-arrow)"/>
+<line x1="400" y1="272" x2="480" y2="272" stroke="#2F6B5E" stroke-width="1.2" marker-end="url(#fasl-architecture-arrow-link)"/>
+<line x1="560" y1="300" x2="560" y2="352" stroke="#835A1C" stroke-width="1.4" marker-end="url(#fasl-architecture-arrow-accent)"/>
+<path d="M640,260 H692 Q700,260 700,252 V204 Q700,196 708,196 H760" fill="none" stroke="#2F6B5E" stroke-width="1.2" marker-end="url(#fasl-architecture-arrow-link)"/>
+<path d="M640,284 H692 Q700,284 700,292 V340 Q700,348 708,348 H760" fill="none" stroke="#2F6B5E" stroke-width="1.2" marker-end="url(#fasl-architecture-arrow-link)"/>
+
+<!-- Arrow labels -->
+<rect x="186" y="252" width="36" height="12" rx="2" fill="#F7EDD8"/>
+<text x="204" y="261" fill="#5F5546" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">PHOTO</text>
+<rect x="418" y="252" width="44" height="12" rx="2" fill="#F7EDD8"/>
+<text x="440" y="261" fill="#2F6B5E" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">/API/*</text>
+<rect x="568" y="320" width="28" height="12" rx="2" fill="#F7EDD8"/>
+<text x="582" y="329" fill="#835A1C" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">RUN</text>
+<rect x="708" y="222" width="32" height="12" rx="2" fill="#F7EDD8"/>
+<text x="724" y="231" fill="#2F6B5E" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">CHAT</text>
+<rect x="708" y="310" width="44" height="12" rx="2" fill="#F7EDD8"/>
+<text x="730" y="319" fill="#2F6B5E" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">SPEECH</text>
+
+<!-- Nodes -->
+<rect x="40" y="244" width="128" height="56" rx="6" fill="#F7EDD8"/>
+<rect x="40" y="244" width="128" height="56" rx="6" fill="rgba(74,74,74,0.10)" stroke="#5F5546" stroke-width="1"/>
+<rect x="48" y="250" width="28" height="12" rx="2" fill="none" stroke="#5F5546" stroke-opacity="0.5" stroke-width="0.8"/>
+<text x="62" y="259" fill="#5F5546" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">USER</text>
+<text x="104" y="274" fill="#121212" font-size="12" font-weight="600" font-family="'Figtree', system-ui, sans-serif" text-anchor="middle">Field officer</text>
+<text x="104" y="290" fill="#4A4A4A" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">phone browser</text>
+<rect x="240" y="244" width="160" height="56" rx="6" fill="#F7EDD8"/>
+<rect x="240" y="244" width="160" height="56" rx="6" fill="#ffffff" stroke="#121212" stroke-width="1"/>
+<rect x="248" y="250" width="24" height="12" rx="2" fill="none" stroke="#5F5546" stroke-opacity="0.5" stroke-width="0.8"/>
+<text x="260" y="259" fill="#5F5546" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">WEB</text>
+<text x="320" y="274" fill="#121212" font-size="12" font-weight="600" font-family="'Figtree', system-ui, sans-serif" text-anchor="middle">Fasl website</text>
+<text x="320" y="290" fill="#4A4A4A" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">Next.js · /dashboard</text>
+<rect x="480" y="244" width="160" height="56" rx="6" fill="#F7EDD8"/>
+<rect x="480" y="244" width="160" height="56" rx="6" fill="#ffffff" stroke="#121212" stroke-width="1"/>
+<rect x="488" y="250" width="24" height="12" rx="2" fill="none" stroke="#5F5546" stroke-opacity="0.5" stroke-width="0.8"/>
+<text x="500" y="259" fill="#5F5546" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">API</text>
+<text x="560" y="274" fill="#121212" font-size="12" font-weight="600" font-family="'Figtree', system-ui, sans-serif" text-anchor="middle">Model API</text>
+<text x="560" y="290" fill="#4A4A4A" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">FastAPI · /api/*</text>
+<rect x="480" y="352" width="160" height="56" rx="6" fill="#F7EDD8"/>
+<rect x="480" y="352" width="160" height="56" rx="6" fill="rgba(227,192,126,0.35)" stroke="#835A1C" stroke-width="1"/>
+<rect x="488" y="358" width="36" height="12" rx="2" fill="none" stroke="#835A1C" stroke-opacity="0.5" stroke-width="0.8"/>
+<text x="506" y="367" fill="#835A1C" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">MODEL</text>
+<text x="560" y="382" fill="#121212" font-size="12" font-weight="600" font-family="'Figtree', system-ui, sans-serif" text-anchor="middle">Wheat model</text>
+<text x="560" y="398" fill="#4A4A4A" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">ONNX · stage + health</text>
+<rect x="760" y="168" width="160" height="56" rx="6" fill="#F7EDD8"/>
+<rect x="760" y="168" width="160" height="56" rx="6" fill="rgba(18,18,18,0.03)" stroke="rgba(18,18,18,0.30)" stroke-width="1"/>
+<rect x="768" y="174" width="24" height="12" rx="2" fill="none" stroke="#5F5546" stroke-opacity="0.5" stroke-width="0.8"/>
+<text x="780" y="183" fill="#5F5546" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">EXT</text>
+<text x="840" y="198" fill="#121212" font-size="12" font-weight="600" font-family="'Figtree', system-ui, sans-serif" text-anchor="middle">Groq LLM</text>
+<text x="840" y="214" fill="#4A4A4A" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">crop assistant chat</text>
+<rect x="760" y="320" width="160" height="56" rx="6" fill="#F7EDD8"/>
+<rect x="760" y="320" width="160" height="56" rx="6" fill="rgba(18,18,18,0.03)" stroke="rgba(18,18,18,0.30)" stroke-width="1"/>
+<rect x="768" y="326" width="24" height="12" rx="2" fill="none" stroke="#5F5546" stroke-opacity="0.5" stroke-width="0.8"/>
+<text x="780" y="335" fill="#5F5546" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">EXT</text>
+<text x="840" y="350" fill="#121212" font-size="12" font-weight="600" font-family="'Figtree', system-ui, sans-serif" text-anchor="middle">Edge TTS</text>
+<text x="840" y="366" fill="#4A4A4A" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">Urdu + English voice</text>
+
+<!-- Callout -->
+<text x="320" y="340" fill="#4A4A4A" font-size="14" font-style="italic" font-family="'Instrument Serif', serif" text-anchor="middle">PDF and voice input</text>
+<text x="320" y="358" fill="#4A4A4A" font-size="14" font-style="italic" font-family="'Instrument Serif', serif" text-anchor="middle">run in the browser</text>
+
+<line x1="40" y1="476" x2="920" y2="476" stroke="rgba(18,18,18,0.10)" stroke-width="0.8"/>
+<text x="40" y="492" fill="#4A4A4A" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.18em">LEGEND</text>
+<rect x="40" y="508" width="24" height="12" rx="2" fill="rgba(227,192,126,0.35)" stroke="#835A1C" stroke-width="1"/>
+<text x="72" y="518" fill="#4A4A4A" font-size="8.5" font-family="'Figtree', system-ui, sans-serif">Focal: the model</text>
+<rect x="184" y="508" width="24" height="12" rx="2" fill="#ffffff" stroke="#121212" stroke-width="1"/>
+<text x="216" y="518" fill="#4A4A4A" font-size="8.5" font-family="'Figtree', system-ui, sans-serif">Fasl service</text>
+<rect x="320" y="508" width="24" height="12" rx="2" fill="rgba(74,74,74,0.10)" stroke="#5F5546" stroke-width="1"/>
+<text x="352" y="518" fill="#4A4A4A" font-size="8.5" font-family="'Figtree', system-ui, sans-serif">Person</text>
+<rect x="436" y="508" width="24" height="12" rx="2" fill="rgba(18,18,18,0.03)" stroke="rgba(18,18,18,0.30)" stroke-width="1"/>
+<text x="468" y="518" fill="#4A4A4A" font-size="8.5" font-family="'Figtree', system-ui, sans-serif">External service</text>
+<line x1="604" y1="514" x2="628" y2="514" stroke="#2F6B5E" stroke-width="1.2" marker-end="url(#fasl-architecture-arrow-link)"/>
+<text x="636" y="518" fill="#4A4A4A" font-size="8.5" font-family="'Figtree', system-ui, sans-serif">HTTP call</text>
+<line x1="732" y1="514" x2="756" y2="514" stroke="#835A1C" stroke-width="1.2" marker-end="url(#fasl-architecture-arrow-accent)"/>
+<text x="764" y="518" fill="#4A4A4A" font-size="8.5" font-family="'Figtree', system-ui, sans-serif">Inference</text>
+
+        </g>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

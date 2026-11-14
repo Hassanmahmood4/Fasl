@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>From public datasets to a live model</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Figtree:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:  #F7EDD8;   /* wheat-tint */
+      --color-ink:    #121212;   /* black */
+      --color-muted:  #4A4A4A;   /* charcoal */
+      --color-accent: #835A1C;   /* bronze */
+      --font-sans:    'Figtree', system-ui, sans-serif;
+      --font-serif:   'Instrument Serif', serif;
+      --font-mono:    'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1280px; width: 100%; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 1280px; display: block; }
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Steps · Fasl</p>
+    <h1>From public datasets to a live model</h1>
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 344" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fasl-ml-pipeline-title fasl-ml-pipeline-desc">
+        <title id="fasl-ml-pipeline-title">From public datasets to a live model</title>
+        <desc id="fasl-ml-pipeline-desc">The Fasl machine-learning pipeline in five steps: collect public wheat datasets, clean and split them, train an EfficientNet-B0 health head and growth-stage head, export one ONNX file with labels and metrics, and serve it with FastAPI.</desc>
+        <defs>
+<marker id="fasl-ml-pipeline-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4A4A4A"/></marker>
+<marker id="fasl-ml-pipeline-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#835A1C"/></marker>
+<marker id="fasl-ml-pipeline-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2F6B5E"/></marker>
+
+        </defs>
+        <rect width="100%" height="100%" fill="#F7EDD8"/>
+        <g transform="translate(0,-112)">
+
+<g aria-hidden="true">
+<rect x="80" y="240" width="224" height="48" fill="rgba(18,18,18,0.05)" data-role="rail" data-step="collect" data-index="1"/>
+<rect x="304" y="240" width="224" height="48" fill="rgba(18,18,18,0.09)" data-role="rail" data-step="clean" data-index="2"/>
+<rect x="528" y="240" width="224" height="48" fill="rgba(227,192,126,0.35)" data-role="rail" data-step="train" data-index="3" data-focal="true"/>
+<line x1="528" y1="240.5" x2="752" y2="240.5" stroke="#835A1C" stroke-width="1"/>
+<line x1="528" y1="287.5" x2="752" y2="287.5" stroke="#835A1C" stroke-width="1"/>
+<rect x="752" y="240" width="224" height="48" fill="rgba(18,18,18,0.09)" data-role="rail" data-step="export" data-index="4"/>
+<rect x="976" y="240" width="224" height="48" fill="rgba(18,18,18,0.05)" data-role="rail" data-step="serve" data-index="5"/>
+</g>
+<g aria-hidden="true">
+<line x1="192.5" y1="184" x2="192.5" y2="220" stroke="#D9C8A3" stroke-width="1"/>
+<line x1="416.5" y1="184" x2="416.5" y2="220" stroke="#D9C8A3" stroke-width="1"/>
+<line x1="640.5" y1="184" x2="640.5" y2="220" stroke="#835A1C" stroke-width="1"/>
+<line x1="864.5" y1="184" x2="864.5" y2="220" stroke="#D9C8A3" stroke-width="1"/>
+<line x1="1088.5" y1="184" x2="1088.5" y2="220" stroke="#D9C8A3" stroke-width="1"/>
+</g>
+<g font-family="'Geist Mono', ui-monospace, monospace" font-size="8" font-weight="600" letter-spacing="0.14em" text-anchor="middle">
+<text x="192" y="164" fill="#4A4A4A" data-role="number" data-step="collect">01</text>
+<text x="416" y="164" fill="#4A4A4A" data-role="number" data-step="clean">02</text>
+<text x="640" y="164" fill="#835A1C" data-role="number" data-step="train">03</text>
+<text x="864" y="164" fill="#4A4A4A" data-role="number" data-step="export">04</text>
+<text x="1088" y="164" fill="#4A4A4A" data-role="number" data-step="serve">05</text>
+</g>
+<g aria-hidden="true" stroke-width="1">
+<circle cx="192" cy="264" r="36" fill="#F7EDD8" stroke="none"/>
+<circle cx="192" cy="264" r="36" fill="#F7EDD8" stroke="#121212" data-role="medallion" data-step="collect"/>
+<circle cx="416" cy="264" r="36" fill="#F7EDD8" stroke="none"/>
+<circle cx="416" cy="264" r="36" fill="#F7EDD8" stroke="#121212" data-role="medallion" data-step="clean"/>
+<circle cx="640" cy="264" r="36" fill="#F7EDD8" stroke="none"/>
+<circle cx="640" cy="264" r="36" fill="rgba(227,192,126,0.35)" stroke="#835A1C" data-role="medallion" data-step="train" data-focal="true"/>
+<circle cx="864" cy="264" r="36" fill="#F7EDD8" stroke="none"/>
+<circle cx="864" cy="264" r="36" fill="#F7EDD8" stroke="#121212" data-role="medallion" data-step="export"/>
+<circle cx="1088" cy="264" r="36" fill="#F7EDD8" stroke="none"/>
+<circle cx="1088" cy="264" r="36" fill="#F7EDD8" stroke="#121212" data-role="medallion" data-step="serve"/>
+</g>
+<g aria-hidden="true">
+<g transform="translate(180,252)" color="#121212"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6a8 3 0 1 0 16 0a8 3 0 1 0 -16 0" /> <path d="M4 6v6a8 3 0 0 0 16 0v-6" /> <path d="M4 12v6a8 3 0 0 0 16 0v-6" /></svg></g>
+<g transform="translate(404,252)" color="#121212"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /> <path d="M21 21l-6 -6" /></svg></g>
+<g transform="translate(628,252)" color="#835A1C"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v2a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3" /> <path d="M3 15a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v2a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3l0 -2" /> <path d="M7 8l0 .01" /> <path d="M7 16l0 .01" /></svg></g>
+<g transform="translate(852,252)" color="#121212"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" /> <path d="M12 12l8 -4.5" /> <path d="M12 12l0 9" /> <path d="M12 12l-8 -4.5" /> <path d="M16 5.25l-8 4.5" /></svg></g>
+<g transform="translate(1076,252)" color="#121212"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.657 18c-2.572 0 -4.657 -2.007 -4.657 -4.483c0 -2.475 2.085 -4.482 4.657 -4.482c.393 -1.762 1.794 -3.2 3.675 -3.773c1.88 -.572 3.956 -.193 5.444 1c1.488 1.19 2.162 3.007 1.77 4.769h.99c1.913 0 3.464 1.56 3.464 3.486c0 1.927 -1.551 3.487 -3.465 3.487h-11.878" /></svg></g>
+</g>
+<text x="192" y="360" fill="#121212" font-size="12" font-weight="600" font-family="'Figtree', system-ui, sans-serif" text-anchor="middle">Collect</text>
+<text x="192" y="388" fill="#4A4A4A" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">Six public wheat datasets</text>
+<text x="192" y="408" fill="#4A4A4A" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">merged, labels mapped</text>
+<text x="416" y="360" fill="#121212" font-size="12" font-weight="600" font-family="'Figtree', system-ui, sans-serif" text-anchor="middle">Clean</text>
+<text x="416" y="388" fill="#4A4A4A" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">pHash dedupe, blur check</text>
+<text x="416" y="408" fill="#4A4A4A" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">70 / 15 / 15 split</text>
+<text x="640" y="360" fill="#835A1C" font-size="12" font-weight="600" font-family="'Figtree', system-ui, sans-serif" text-anchor="middle">Train</text>
+<text x="640" y="388" fill="#4A4A4A" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">EfficientNet-B0 per head:</text>
+<text x="640" y="408" fill="#4A4A4A" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">health and growth stage</text>
+<text x="864" y="360" fill="#121212" font-size="12" font-weight="600" font-family="'Figtree', system-ui, sans-serif" text-anchor="middle">Export</text>
+<text x="864" y="388" fill="#4A4A4A" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">One ONNX file, plus</text>
+<text x="864" y="408" fill="#4A4A4A" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">labels and metrics</text>
+<text x="1088" y="360" fill="#121212" font-size="12" font-weight="600" font-family="'Figtree', system-ui, sans-serif" text-anchor="middle">Serve</text>
+<text x="1088" y="388" fill="#4A4A4A" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">FastAPI scores photos;</text>
+<text x="1088" y="408" fill="#4A4A4A" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">the site shows metrics</text>
+
+        </g>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>
