@@ -20,7 +20,7 @@ const M = 40;
 const OUTER = 18;
 const CONTENT_W = PAGE_W - M * 2;
 const FOOTER_H = 74;
-const FOOTER_TOP = PAGE_H - M - FOOTER_H;
+const FOOTER_TOP = PAGE_H - M - FOOTER_H - 10;
 
 const SEVERITIES: Severity[] = ["mild", "moderate", "severe"];
 const SEVERITY_FILL = [C.tint, C.wheat, C.deep];
@@ -194,13 +194,13 @@ export async function downloadReportPdf(report: Report, photo: Photo, isSample: 
     if (pages > 1) doc.text(`Page ${page} of ${pages}`, PAGE_W - M, FOOTER_TOP + FOOTER_H + 15, { align: "right" });
   };
 
-  let y = M + 72;
+  let y = M + 76;
   /** Starts a new page when the next piece won't fit above the footer. */
   const room = (height: number) => {
     if (y + height <= FOOTER_TOP - 16) return;
     doc.addPage();
     drawHeader();
-    y = M + 64;
+    y = M + 68;
   };
 
   drawHeader();
