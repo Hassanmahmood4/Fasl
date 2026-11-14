@@ -45,7 +45,7 @@ export function ConfusionMatrix({ confusion }: { confusion: Metrics["confusion"]
             <tr>
               <td className="w-[4.25rem] sm:w-24" />
               {labels.map((label) => (
-                <th key={label} scope="col" className="px-0 pb-1 align-bottom leading-tight font-semibold sm:px-0.5">
+                <th key={label} scope="col" className="px-0 pb-1.5 align-bottom leading-tight font-semibold sm:px-1">
                   {/* Many narrow columns on phones: labels run sideways instead of breaking mid-word. */}
                   <span className={labels.length > 5 ? "inline-block max-sm:h-[7.25em] max-sm:rotate-180 max-sm:text-left max-sm:whitespace-nowrap max-sm:[writing-mode:vertical-rl]" : undefined}>
                     {label}
