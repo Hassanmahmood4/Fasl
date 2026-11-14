@@ -147,7 +147,7 @@ async function stampLogo(): Promise<Raster | null> {
       loadImage("/samples/wheat-ripe.jpg"),
       document.fonts.load(`600 9px ${figtree}`),
       document.fonts.load(`700 12px ${figtree}`),
-      document.fonts.load(`64px ${nastaliq}`, "فصل"),
+      document.fonts.load(`48px ${nastaliq}`, "فصل"),
     ]);
   } catch {
     return null;
@@ -155,7 +155,7 @@ async function stampLogo(): Promise<Raster | null> {
 
   // Laid out in CSS pixels as on the site, drawn at 4x.
   const S = 4;
-  const W = 356;
+  const W = 318;
   const H = 150;
   const { el, ctx } = canvas(W * S, H * S);
   ctx.scale(S, S);
@@ -222,11 +222,11 @@ async function stampLogo(): Promise<Raster | null> {
   ctx.restore();
 
   // Wordmark to the right, as in the footer.
-  ctx.font = `64px ${nastaliq}`;
+  ctx.font = `48px ${nastaliq}`;
   ctx.direction = "rtl";
   ctx.textAlign = "right";
   ctx.fillStyle = C.black;
-  ctx.fillText("فصل", W - 6, 92);
+  ctx.fillText("فصل", W - 6, 96);
 
   return { data: el.toDataURL("image/png"), ratio: H / W };
 }
