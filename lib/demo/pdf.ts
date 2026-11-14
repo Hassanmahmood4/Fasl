@@ -155,8 +155,10 @@ export async function downloadReportPdf(report: Report, photo: Photo, isSample: 
     return doc.getTextWidth("Fasl");
   };
 
-  /* Header: the black pill nav from the site. */
+  /* Wheat page, then the black pill nav from the site. */
   const drawHeader = () => {
+    fill(C.wheat);
+    doc.rect(0, 0, PAGE_W, PAGE_H, "F");
     fill(C.black);
     doc.roundedRect(M, M - 8, CONTENT_W, 44, 22, 22, "F");
     mark(markWheat, M + 20, M - 1, 30, C.wheat);
