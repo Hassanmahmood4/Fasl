@@ -12,8 +12,8 @@ import {
 } from "./backdrop";
 import { drawFarmer, drawHeadBundle, drawOx, type Outfit, type Pose } from "./figures";
 
-/** How much of the scene, up from the ground, must show below the panel. */
-const WINDOW_HEIGHT = 700;
+/** How much of the scene, up from the ground, must show below the panel: the tallest peak (y 285) and a margin. */
+const WINDOW_HEIGHT = 730;
 
 export function fitViewport(width: number, height: number, windowPx: number, dpr: number): Viewport {
   const scale = Math.max(width / SCENE_WIDTH, windowPx / WINDOW_HEIGHT);

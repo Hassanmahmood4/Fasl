@@ -12,7 +12,10 @@ import {
 import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { FooterWheat } from "./FooterWheat";
 
-/** A painted, living farm behind the footer panel. The panel floats over its sky. */
+/**
+ * A painted, living farm below the footer panel. The panel sits on the sky; the window beneath it
+ * is sized from the width so the whole scene, peaks to ground, shows without the panel covering it.
+ */
 export function FarmScene({ children }: { children: ReactNode }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const windowRef = useRef<HTMLDivElement>(null);
@@ -78,15 +81,15 @@ export function FarmScene({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="relative overflow-hidden lg:flex lg:h-svh lg:flex-col">
+    <div className="relative overflow-hidden">
       <canvas
         ref={canvasRef}
         role="img"
         aria-label="An illustrated Pakistani farm. Farmers harvest and winnow golden wheat while oxen plough behind them, with a village and snow-capped mountains beyond."
         className="absolute inset-0 h-full w-full"
       />
-      <div className="relative lg:shrink-0">{children}</div>
-      <div ref={windowRef} className="relative h-[clamp(340px,44vw,680px)] lg:h-auto lg:min-h-0 lg:flex-1">
+      <div className="relative">{children}</div>
+      <div ref={windowRef} className="relative h-[max(340px,46vw)]">
         <div className="absolute inset-x-0 bottom-0">
           <FooterWheat />
         </div>
