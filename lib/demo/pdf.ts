@@ -16,6 +16,8 @@ const C = {
 const PAGE_W = 595.28;
 const PAGE_H = 841.89;
 const M = 40;
+/* The page is wheat; the whole report sits on one white card inset from its edge, as on the dashboard. */
+const OUTER = 18;
 const CONTENT_W = PAGE_W - M * 2;
 const FOOTER_H = 74;
 const FOOTER_TOP = PAGE_H - M - FOOTER_H;
@@ -155,10 +157,12 @@ export async function downloadReportPdf(report: Report, photo: Photo, isSample: 
     return doc.getTextWidth("Fasl");
   };
 
-  /* Wheat page, then the black pill nav from the site. */
+  /* Wheat page with one white card for the whole report, then the black pill nav from the site. */
   const drawHeader = () => {
     fill(C.wheat);
     doc.rect(0, 0, PAGE_W, PAGE_H, "F");
+    fill(C.white);
+    doc.roundedRect(OUTER, OUTER, PAGE_W - OUTER * 2, PAGE_H - OUTER * 2, 20, 20, "F");
     fill(C.black);
     doc.roundedRect(M, M - 8, CONTENT_W, 44, 22, 22, "F");
     mark(markWheat, M + 20, M - 1, 30, C.wheat);
