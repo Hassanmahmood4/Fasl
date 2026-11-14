@@ -157,18 +157,19 @@ export async function downloadReportPdf(report: Report, photo: Photo, isSample: 
     return doc.getTextWidth("Fasl");
   };
 
-  /* Wheat page with one white card for the whole report, then the black pill nav from the site. */
+  /* Wheat page with one white card for the whole report, then a white pill nav outlined in wheat. */
   const drawHeader = () => {
     fill(C.wheat);
     doc.rect(0, 0, PAGE_W, PAGE_H, "F");
     fill(C.white);
     doc.roundedRect(OUTER, OUTER, PAGE_W - OUTER * 2, PAGE_H - OUTER * 2, 20, 20, "F");
-    fill(C.black);
-    doc.roundedRect(M, M - 8, CONTENT_W, 44, 22, 22, "F");
-    mark(markWheat, M + 20, M - 1, 30, C.wheat);
-    font(10, "bold", C.white);
+    fill(C.white);
+    doc.setDrawColor(C.wheat).setLineWidth(1.2);
+    doc.roundedRect(M, M - 8, CONTENT_W, 44, 22, 22, "FD");
+    mark(markBlack, M + 20, M - 1, 30, C.black);
+    font(10, "bold", C.black);
     doc.text("Crop report", PAGE_W - M - 20, M + 12, { align: "right" });
-    font(8.5, "normal", C.wheat);
+    font(8.5, "normal", C.charcoal);
     doc.text(today, PAGE_W - M - 20, M + 24, { align: "right" });
   };
 
