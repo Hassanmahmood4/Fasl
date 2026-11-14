@@ -35,7 +35,7 @@ export function ConfusionMatrix({ confusion }: { confusion: Metrics["confusion"]
         className="overflow-x-auto px-2 py-4 sm:px-5 lg:py-5 short:py-2"
       >
         <table
-          className="w-full min-w-[300px] table-fixed border-separate border-spacing-0.5 text-center text-[0.6875rem] tabular-nums sm:border-spacing-1 sm:text-caption"
+          className="mx-auto w-full max-w-[36rem] min-w-[300px] table-fixed border-separate border-spacing-0.5 text-center text-[0.6875rem] tabular-nums sm:border-spacing-1 sm:text-caption"
         >
           <caption className="sr-only">
             Rows are the true label, columns are the predicted label. Each cell shows the share of
