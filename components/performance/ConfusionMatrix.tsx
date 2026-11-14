@@ -47,7 +47,10 @@ export function ConfusionMatrix({ confusion }: { confusion: Metrics["confusion"]
               {labels.map((label) => (
                 <th key={label} scope="col" className="px-0 pb-1.5 align-bottom leading-tight font-semibold sm:px-1">
                   {/* Many narrow columns: labels run sideways instead of colliding or breaking mid-word. */}
-                  <span className={labels.length > 5 ? "inline-block h-[7.25em] rotate-180 text-left whitespace-nowrap [writing-mode:vertical-rl]" : undefined}>
+                  <span
+                    className={labels.length > 5 ? "inline-block rotate-180 text-left whitespace-nowrap [writing-mode:vertical-rl]" : undefined}
+                    style={labels.length > 5 ? { height: "8.5em" } : undefined}
+                  >
                     {label}
                   </span>
                 </th>
