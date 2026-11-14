@@ -130,10 +130,9 @@ function formatDate(date: Date): string {
 }
 
 export async function downloadReportPdf(report: Report, photo: Photo, isSample: boolean): Promise<void> {
-  const [{ jsPDF }, tile, markWheat, markBlack] = await Promise.all([
+  const [{ jsPDF }, tile, markBlack] = await Promise.all([
     import("jspdf"),
     photoTile(photo.src),
-    urduMark(C.wheat),
     urduMark(C.black),
   ]);
   const icon = wheatIcon();
