@@ -1,9 +1,11 @@
-const WIDTH = 150;
-const HEIGHT = 178;
+export const STAMP_WIDTH = 150;
+export const STAMP_HEIGHT = 178;
+const WIDTH = STAMP_WIDTH;
+const HEIGHT = STAMP_HEIGHT;
 const TOOTH = 12;
 
 /** A rectangle with postage-stamp perforations cut along every edge. */
-function perforatedEdge(): string {
+export function perforatedEdge(): string {
   const r = TOOTH * 0.36;
   const across = Math.round(WIDTH / TOOTH);
   const down = Math.round(HEIGHT / TOOTH);
