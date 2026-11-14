@@ -236,10 +236,11 @@ function formatDate(date: Date): string {
 }
 
 export async function downloadReportPdf(report: Report, photo: Photo, isSample: boolean): Promise<void> {
-  const [{ jsPDF }, tile, markBlack] = await Promise.all([
+  const [{ jsPDF }, tile, markBlack, logo] = await Promise.all([
     import("jspdf"),
     photoTile(photo.src),
     urduMark(C.black),
+    stampLogo(),
   ]);
   const icon = wheatIcon();
   const doc: JsPdf = new jsPDF({ unit: "pt", format: "a4" });
@@ -427,6 +428,14 @@ export async function downloadReportPdf(report: Report, photo: Photo, isSample: 
     y += 6;
     font(8.5, "normal", C.charcoal);
     doc.text("Sample result: illustrative values, not model output.", M, y);
+  }
+
+  /* The footer logo, bottom right of the last page, just above the footer card. Left out if the content reaches down there. */
+  if (logo) {
+    const logoW = 180;
+    const logoH = logoW * logo.ratio;
+    const logoTop = FOOTER_TOP - 10 - logoH;
+    if (y < logoTop) doc.addImage(logo.data, "PNG", PAGE_W - M - logoW + 6, logoTop, logoW, logoH);
   }
 
   const pages = doc.getNumberOfPages();
