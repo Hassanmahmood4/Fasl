@@ -1,4 +1,4 @@
-import { healthLabel, percent, readinessLabel } from "./report";
+import { healthLabel, isStageUnsure, percent, readinessLabel } from "./report";
 import type { Photo, Report } from "./types";
 
 const MARGIN = 48;
@@ -57,7 +57,9 @@ export async function downloadReportPdf(
   block("Crop", `${report.crop.name} (${percent(report.crop.confidence)} confidence)`);
   block(
     "Growth stage",
-    `${report.stage.name}, stage ${report.stage.index} of ${report.stage.total}`,
+    isStageUnsure(report)
+      ? "Uncertain from this photo"
+      : `${report.stage.name}, stage ${report.stage.index} of ${report.stage.total}`,
   );
   block(
     "Harvest readiness",

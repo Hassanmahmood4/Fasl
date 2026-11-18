@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Wheat } from "lucide-react";
-import { healthLabel, percent, readinessLabel, STAGES } from "@/lib/demo/report";
+import { healthLabel, isStageUnsure, percent, readinessLabel, STAGES } from "@/lib/demo/report";
 import type { Report, Severity } from "@/lib/demo/types";
 
 const SEVERITIES: Severity[] = ["mild", "moderate", "severe"];
@@ -42,6 +42,7 @@ function SeverityMeter({ severity }: { severity: Severity }) {
 
 export function ReportBlocks({ report }: { report: Report }) {
   const { crop, stage, health } = report;
+  const stageUnsure = isStageUnsure(report);
 
   return (
     <>
@@ -65,7 +66,7 @@ export function ReportBlocks({ report }: { report: Report }) {
       <Block title="Growth stage" className="md:order-3 md:col-span-2">
         <ol className="grid grid-cols-4 gap-1">
           {STAGES.map((name, index) => {
-            const current = index + 1 === stage.index;
+            const current = !stageUnsure && index + 1 === stage.index;
             return (
               <li
                 key={name}
@@ -77,6 +78,11 @@ export function ReportBlocks({ report }: { report: Report }) {
             );
           })}
         </ol>
+        {stageUnsure && (
+          <p className="mt-2 text-caption text-charcoal">
+            Stage uncertain from this photo. Photograph the whole plant, including the ear.
+          </p>
+        )}
       </Block>
 
       <Block title="Health" className="md:order-2">
