@@ -11,9 +11,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from PIL import UnidentifiedImageError
 
 from .chat import router as chat_router
-from .model import WheatModel, load_config
+from .model import WheatModel, is_blurry, load_config
 from . import tts
-from .report import build_report, urdu_summary
+from .report import BLURRY, build_report, urdu_summary
 
 MAX_BYTES = 10 * 1024 * 1024
 
@@ -48,14 +48,22 @@ async def predict(image: UploadFile = File(...)) -> dict:
         raise HTTPException(status_code=400, detail="Empty upload.")
     if len(data) > MAX_BYTES:
         raise HTTPException(status_code=413, detail="Image is larger than 10 MB.")
-    model = get_model()
     try:
+        if is_blurry(data):
+            return BLURRY
+        model = get_model()
         stage, health_head = model.predict(data)
     except (UnidentifiedImageError, OSError):
         raise HTTPException(status_code=400, detail="File is not a readable image.")
     report = build_report(stage, health_head, model.threshold)
     if "crop" in report:
-        report["urduAudioUrl"] = tts.audio_url(urdu_summary(stage, health_head), "ur")
+        summary = urdu_summary(
+            stage,
+            health_head,
+            stage_sure=not report["stage"].get("uncertain", False),
+            health_sure=report["health"]["status"] != "uncertain",
+        )
+        report["urduAudioUrl"] = tts.audio_url(summary, "ur")
     return report
 
 

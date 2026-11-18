@@ -38,7 +38,16 @@ DISEASE_ACTIONS = {
     "powdery_mildew": ["Check for white powdery patches on leaves and stems.", CONFIRM],
 }
 
-UNCLEAR = {"status": "unclear", "message": "Photo unclear. Retake it closer, in daylight."}
+UNCLEAR = {
+    "status": "unclear",
+    "message": "The model isn't confident about this photo. Retake it closer, in daylight.",
+}
+
+# Same "unclear" status, so the website needs no change; only the reason differs.
+BLURRY = {"status": "unclear", "message": "Photo is blurry. Hold the camera steady and retake it in daylight."}
+
+STAGE_UNSURE = "The growth stage isn't clear from this photo. A photo of whole plants with their ears helps."
+HEALTH_UNSURE = "Crop health isn't clear from this photo. Take a close-up of the leaves to check for disease."
 
 # Urdu, for the spoken summary. Stage names are in the form used before "میں ہے".
 STAGE_UR = {
@@ -58,16 +67,22 @@ DISEASE_UR = {
 }
 
 
-def urdu_summary(stage: Head, health: Head) -> str:
-    parts = ["یہ گندم کی فصل ہے۔", f"فصل {STAGE_UR[stage.label]} میں ہے۔"]
-    if health.label == "healthy":
+def urdu_summary(stage: Head, health: Head, stage_sure: bool = True, health_sure: bool = True) -> str:
+    parts = ["یہ گندم کی فصل ہے۔"]
+    if stage_sure:
+        parts.append(f"فصل {STAGE_UR[stage.label]} میں ہے۔")
+    else:
+        parts.append("اس تصویر سے فصل کا مرحلہ واضح نہیں ہے۔")
+    if not health_sure:
+        parts.append("اس تصویر سے فصل کی صحت واضح نہیں ہے۔ بیماری جانچنے کے لیے پتوں کی قریب سے تصویر لیں۔")
+    elif health.label == "healthy":
         parts.append("فصل صحت مند ہے، کوئی بیماری نظر نہیں آئی۔ ہر ہفتے کھیت کا معائنہ کرتے رہیں۔")
     else:
         parts.append(f"فصل میں {DISEASE_UR[health.label]} کی علامات نظر آئی ہیں۔")
         parts.append("اسپرے کرنے سے پہلے اپنے مقامی محکمہ زراعت کے افسر سے تصدیق ضرور کریں۔")
-    if stage.label == "ripening":
+    if stage_sure and stage.label == "ripening":
         parts.append("فصل پک رہی ہے۔ جب دانے سخت اور خشک ہو جائیں تو کٹائی کا انتظام کریں۔")
-    else:
+    elif stage_sure:
         parts.append("فصل ابھی کٹائی کے لیے تیار نہیں ہے۔")
     return " ".join(parts)
 
@@ -75,32 +90,50 @@ def urdu_summary(stage: Head, health: Head) -> str:
 def build_report(stage: Head, health: Head, threshold: float) -> dict:
     if health.label == "not_wheat":
         return UNCLEAR
-    if stage.confidence < threshold or health.confidence < threshold:
+
+    # Judge stage and health separately: a leaf close-up can show rust clearly but not the stage.
+    stage_sure = stage.confidence >= threshold
+    health_sure = health.confidence >= threshold
+    if not stage_sure and not health_sure:
         return UNCLEAR
 
     healthy = health.label == "healthy"
-    ripe = stage.label == "ripening"
+    ripe = stage_sure and stage.label == "ripening"
 
     actions: list[str] = []
-    if healthy:
+    if not health_sure:
+        actions.append(HEALTH_UNSURE)
+    elif healthy:
         actions.append("No disease detected. Keep checking the field weekly.")
     else:
         actions.extend(DISEASE_ACTIONS[health.label])
-    if ripe:
+    if not stage_sure:
+        actions.append(STAGE_UNSURE)
+    elif ripe:
         actions.append("The crop is ripening. Plan harvest once grains are hard and dry.")
 
-    report: dict = {
+    stage_out: dict = {
+        "index": stage.index + 1,
+        "name": STAGE_NAMES[stage.label],
+        "total": len(STAGE_NAMES),
+        "confidence": round(stage.confidence, 4),
+    }
+    readiness: dict = {"ready": ripe}
+    if not stage_sure:
+        stage_out["uncertain"] = True
+        readiness["uncertain"] = True
+
+    if not health_sure:
+        health_out: dict = {"status": "uncertain", "confidence": round(health.confidence, 4)}
+    else:
+        health_out = {"status": "healthy" if healthy else "disease", "confidence": round(health.confidence, 4)}
+        if not healthy:
+            health_out["disease"] = DISEASE_NAMES[health.label]
+
+    return {
         "crop": {"name": "Wheat", "confidence": round(1.0 - health.probs["not_wheat"], 4)},
-        "stage": {
-            "index": stage.index + 1,
-            "name": STAGE_NAMES[stage.label],
-            "total": len(STAGE_NAMES),
-            "confidence": round(stage.confidence, 4),
-        },
-        "readiness": {"ready": ripe},
-        "health": {"status": "healthy" if healthy else "disease", "confidence": round(health.confidence, 4)},
+        "stage": stage_out,
+        "readiness": readiness,
+        "health": health_out,
         "actions": actions,
     }
-    if not healthy:
-        report["health"]["disease"] = DISEASE_NAMES[health.label]
-    return report

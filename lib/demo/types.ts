@@ -2,10 +2,12 @@ export type Severity = "mild" | "moderate" | "severe";
 
 export type Report = {
   crop: { name: string; confidence: number };
-  stage: { index: number; name: string; total: number; confidence: number };
-  readiness: { ready: boolean; daysLeft?: [number, number] };
+  /** `uncertain`: the model couldn't tell the stage from this photo; the rest of the report still stands. */
+  stage: { index: number; name: string; total: number; confidence: number; uncertain?: boolean };
+  readiness: { ready: boolean; daysLeft?: [number, number]; uncertain?: boolean };
   health: {
-    status: "healthy" | "disease";
+    /** "uncertain": the model couldn't judge health from this photo, so no disease is named. */
+    status: "healthy" | "disease" | "uncertain";
     disease?: string;
     severity?: Severity;
     location?: string;
@@ -18,7 +20,7 @@ export type Report = {
 
 export type AnalysisResult =
   | { kind: "report"; report: Report }
-  | { kind: "unclear" };
+  | { kind: "unclear"; message?: string };
 
 export type Photo = {
   src: string;
