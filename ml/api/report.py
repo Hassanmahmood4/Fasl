@@ -35,6 +35,11 @@ DISEASE_ACTIONS = {
 
 UNCLEAR = {"status": "unclear", "message": "Photo unclear. Retake it closer, in daylight."}
 
+STAGE_UNSURE = (
+    "The growth stage is uncertain from this photo. Photograph the whole plant, including the ear, "
+    "to check harvest readiness."
+)
+
 # Urdu, for the spoken summary. Stage names are in the form used before "میں ہے".
 STAGE_UR = {
     "vegetative": "ابتدائی بڑھوتری کے مرحلے",
@@ -53,14 +58,20 @@ DISEASE_UR = {
 }
 
 
-def urdu_summary(stage: Head, health: Head) -> str:
-    parts = ["یہ گندم کی فصل ہے۔", f"فصل {STAGE_UR[stage.label]} میں ہے۔"]
+def urdu_summary(stage: Head, health: Head, stage_sure: bool = True) -> str:
+    parts = ["یہ گندم کی فصل ہے۔"]
+    if stage_sure:
+        parts.append(f"فصل {STAGE_UR[stage.label]} میں ہے۔")
+    else:
+        parts.append("اس تصویر سے فصل کا مرحلہ یقینی طور پر معلوم نہیں ہو سکا۔")
     if health.label == "healthy":
         parts.append("فصل صحت مند ہے، کوئی بیماری نظر نہیں آئی۔ ہر ہفتے کھیت کا معائنہ کرتے رہیں۔")
     else:
         parts.append(f"فصل میں {DISEASE_UR[health.label]} کی علامات نظر آئی ہیں۔")
         parts.append("اسپرے کرنے سے پہلے اپنے مقامی محکمہ زراعت کے افسر سے تصدیق ضرور کریں۔")
-    if stage.label == "ripening":
+    if not stage_sure:
+        parts.append("کٹائی کا وقت جانچنے کے لیے بالی سمیت پورے پودے کی تصویر لیں۔")
+    elif stage.label == "ripening":
         parts.append("فصل پک رہی ہے۔ جب دانے سخت اور خشک ہو جائیں تو کٹائی کا انتظام کریں۔")
     else:
         parts.append("فصل ابھی کٹائی کے لیے تیار نہیں ہے۔")
@@ -70,18 +81,23 @@ def urdu_summary(stage: Head, health: Head) -> str:
 def build_report(stage: Head, health: Head, threshold: float) -> dict:
     if health.label == "not_wheat":
         return UNCLEAR
-    if stage.confidence < threshold or health.confidence < threshold:
+    # Health is the main finding; without it the report is not useful.
+    if health.confidence < threshold:
         return UNCLEAR
 
+    # An unsure stage still gives a report, but never a harvest call.
+    stage_sure = stage.confidence >= threshold
     healthy = health.label == "healthy"
-    ripe = stage.label == "ripening"
+    ripe = stage_sure and stage.label == "ripening"
 
     actions: list[str] = []
     if healthy:
         actions.append("No disease detected. Keep checking the field weekly.")
     else:
         actions.extend(DISEASE_ACTIONS[health.label])
-    if ripe:
+    if not stage_sure:
+        actions.append(STAGE_UNSURE)
+    elif ripe:
         actions.append("The crop is ripening. Plan harvest once grains are hard and dry.")
 
     report: dict = {

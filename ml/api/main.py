@@ -49,5 +49,6 @@ async def predict(image: UploadFile = File(...)) -> dict:
         raise HTTPException(status_code=400, detail="File is not a readable image.")
     report = build_report(stage, health_head, model.threshold)
     if "crop" in report:
-        report["urduAudioUrl"] = tts.register(urdu_summary(stage, health_head), "ur")
+        stage_sure = stage.confidence >= model.threshold
+        report["urduAudioUrl"] = tts.register(urdu_summary(stage, health_head, stage_sure), "ur")
     return report
