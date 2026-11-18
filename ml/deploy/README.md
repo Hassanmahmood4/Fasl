@@ -36,7 +36,7 @@ This folder holds the files for a Docker Space that serves `ml/api`:
    | `GROQ_API_KEY` | **Secret** | your Groq key (never put it in the repo) |
    | `ALLOWED_ORIGINS` | Variable | the website address, e.g. `https://fasl.vercel.app` (comma-separate several) |
    | `GROQ_MODEL` | Variable, optional | default `openai/gpt-oss-120b` |
-   | `FASL_MIN_SIDE` | Variable, optional | smallest photo side accepted, default `200` pixels |
+   | `FASL_MIN_SIDE` | Variable, optional | smallest photo side accepted, default `112` pixels |
 
 4. Push. The build takes a few minutes. Urdu audio uses Microsoft's online Edge voice
    (`ur-PK-UzmaNeural`), so the Space needs outgoing internet, which Spaces have by default.

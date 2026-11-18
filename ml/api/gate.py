@@ -14,11 +14,14 @@ import cv2
 import numpy as np
 from PIL import Image, ImageOps
 
-# Pixels on the short side. 200 suits the v0.1 model; after retraining with cheap-phone
-# copies (v0.2), set FASL_MIN_SIDE=112 so photos from basic phones are accepted.
-MIN_SIDE = int(os.getenv("FASL_MIN_SIDE", "200"))
+# Pixels on the short side. The v0.3 model was trained on cheap-phone copies down to 64 px,
+# so photos from basic phones (and small WhatsApp copies) are accepted.
+MIN_SIDE = int(os.getenv("FASL_MIN_SIDE", "112"))
 BLUR_MIN = 15.0         # Laplacian variance, same limit as the cleaning notebook
 MIN_PLANT_COLOUR = 0.25 # share of pixels with green-to-golden plant colours
+# The face detector fires on dense crop texture, so a face only counts when the photo
+# is not mostly plants. Portraits score well below this; field photos well above.
+FACE_MAX_PLANT_COLOUR = 0.6
 
 _faces = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 
@@ -64,6 +67,7 @@ def check(data: bytes) -> Rejection | None:
     gray = img.convert("L")
     if _blur(gray) < BLUR_MIN:
         return BLURRY
-    if _has_face(gray) or _plant_colour(img) < MIN_PLANT_COLOUR:
+    plant = _plant_colour(img)
+    if plant < MIN_PLANT_COLOUR or (plant < FACE_MAX_PLANT_COLOUR and _has_face(gray)):
         return NOT_CROP
     return None
