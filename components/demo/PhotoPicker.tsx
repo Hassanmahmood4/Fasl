@@ -9,7 +9,7 @@ const MAX_BYTES = 10 * 1024 * 1024;
 const ACCEPTED = ["image/jpeg", "image/png"];
 
 const TIPS: { icon: LucideIcon; text: string }[] = [
-  { icon: ZoomIn, text: "Get close to the plant" },
+  { icon: ZoomIn, text: "For disease, photograph a few leaves up close" },
   { icon: Sun, text: "Take it in daylight" },
   { icon: Maximize, text: "Fill the frame with crop" },
 ];
