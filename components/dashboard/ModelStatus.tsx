@@ -3,6 +3,8 @@ import { checkModel } from "@/lib/demo/api";
 
 type Status = "checking" | "online" | "offline";
 
+const RECHECK_MS = 15_000;
+
 const LABEL: Record<Status, string> = {
   checking: "Checking the model",
   online: "Model online",
@@ -21,11 +23,16 @@ export function ModelStatus() {
 
   useEffect(() => {
     let active = true;
-    void checkModel().then((online) => {
-      if (active) setStatus(online ? "online" : "offline");
-    });
+    const check = () =>
+      void checkModel().then((online) => {
+        if (active) setStatus(online ? "online" : "offline");
+      });
+    check();
+    // Keep it live: flips to online when the API starts, and back if it stops.
+    const timer = window.setInterval(check, RECHECK_MS);
     return () => {
       active = false;
+      window.clearInterval(timer);
     };
   }, []);
 
