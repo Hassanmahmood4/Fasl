@@ -29,7 +29,13 @@ DISEASE_ACTIONS = {
     "yellow_rust": ["Check nearby plants for yellow stripes of pustules along the leaves.", CONFIRM],
     "stem_rust": ["Check stems and leaf sheaths for dark red-brown pustules.", CONFIRM],
     "septoria": ["Check lower leaves for brown blotches with small dark specks.", CONFIRM],
-    "loose_smut": ["Mark affected plants; use certified, treated seed next season.", CONFIRM],
+    "loose_smut": [
+        # The model sometimes calls healthy green ears loose smut, so say how to check by eye.
+        "Check the ears: loose smut replaces the grain with black, powdery spores. "
+        "If the ears are green or golden and clean, this result is likely wrong.",
+        "If you do find black ears, mark those plants; use certified, treated seed next season.",
+        CONFIRM,
+    ],
     "powdery_mildew": ["Check for white powdery patches on leaves and stems.", CONFIRM],
 }
 
@@ -68,6 +74,11 @@ def urdu_summary(stage: Head, health: Head, stage_sure: bool = True) -> str:
         parts.append("فصل صحت مند ہے، کوئی بیماری نظر نہیں آئی۔ ہر ہفتے کھیت کا معائنہ کرتے رہیں۔")
     else:
         parts.append(f"فصل میں {DISEASE_UR[health.label]} کی علامات نظر آئی ہیں۔")
+        if health.label == "loose_smut":
+            parts.append(
+                "بالیوں کو دیکھیں: کانگیاری میں دانوں کی جگہ کالا سفوف بن جاتا ہے۔ "
+                "اگر بالیاں ہری یا سنہری اور صاف ہیں تو یہ نتیجہ غالباً درست نہیں۔"
+            )
         parts.append("اسپرے کرنے سے پہلے اپنے مقامی محکمہ زراعت کے افسر سے تصدیق ضرور کریں۔")
     if not stage_sure:
         parts.append("کٹائی کا وقت جانچنے کے لیے بالی سمیت پورے پودے کی تصویر لیں۔")
