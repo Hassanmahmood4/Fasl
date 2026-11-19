@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from PIL import UnidentifiedImageError
 
 from .chat import router as chat_router
-from .model import WheatModel
+from .model import Head, WheatModel
 from . import gate, tts
 from .report import build_report, urdu_summary
 
@@ -26,6 +26,21 @@ app.include_router(chat_router)
 app.include_router(tts.router)
 
 model = WheatModel()
+
+# v0.3 calls many clean green or golden ears loose smut. Loose smut always shows black spores,
+# so without them the result is read as healthy (the two classes the model mixes up).
+SMUT_MIN_DARK = 0.015
+
+
+def check_smut(health: Head, data: bytes) -> Head:
+    if health.probs["loose_smut"] < 0.05 or gate.smut_colour(data) >= SMUT_MIN_DARK:
+        return health
+    probs = dict(health.probs)
+    probs["healthy"] += probs["loose_smut"]
+    probs["loose_smut"] = 0.0
+    labels = model.config["health"]
+    best = max(probs, key=probs.get)
+    return Head(best, labels.index(best), probs[best], probs)
 
 
 @app.get("/health")
@@ -45,6 +60,7 @@ async def predict(image: UploadFile = File(...)) -> dict:
         if rejected:
             return {"status": "unclear", "reason": rejected.reason, "message": rejected.message}
         stage, health_head = model.predict(data)
+        health_head = check_smut(health_head, data)
     except (UnidentifiedImageError, OSError):
         raise HTTPException(status_code=400, detail="File is not a readable image.")
     report = build_report(stage, health_head, model.threshold)

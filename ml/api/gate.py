@@ -51,6 +51,15 @@ def _plant_colour(img: Image.Image) -> float:
     return float(((hue >= 25) & (hue <= 150) & (sat >= 0.18) & (val >= 0.15)).mean())
 
 
+def smut_colour(data: bytes) -> float:
+    """Share of dark brown-to-black pixels (not dark green shade). Loose smut ears are covered
+    in black spores; on real smut photos this is 0.02 or more, on clean green or golden ears ~0."""
+    img = ImageOps.exif_transpose(Image.open(io.BytesIO(data))).convert("RGB")
+    hsv = np.asarray(img.resize((224, 224)).convert("HSV"), dtype=np.float32) / 255
+    hue = hsv[..., 0] * 360
+    return float(((hsv[..., 2] < 0.45) & (hsv[..., 1] < 0.55) & ((hue < 60) | (hue > 300))).mean())
+
+
 def _has_face(gray: Image.Image) -> bool:
     w, h = gray.size
     scale = 512 / max(w, h)
@@ -67,7 +76,7 @@ def check(data: bytes) -> Rejection | None:
     gray = img.convert("L")
     if _blur(gray) < BLUR_MIN:
         return BLURRY
-    plant = _plant_colour(img)
+    plant = _plant_colour(img) + smut_colour(data)   # black smutted ears are crop too
     if plant < MIN_PLANT_COLOUR or (plant < FACE_MAX_PLANT_COLOUR and _has_face(gray)):
         return NOT_CROP
     return None
