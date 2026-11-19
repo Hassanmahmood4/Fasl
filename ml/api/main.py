@@ -11,9 +11,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from PIL import UnidentifiedImageError
 
 from .chat import router as chat_router
-from .model import WheatModel, is_blurry, load_config
-from . import tts
-from .report import BLURRY, build_report, urdu_summary
+from .model import WheatModel, load_config
+from . import gate, tts
+from .report import build_report, urdu_summary
 
 MAX_BYTES = 10 * 1024 * 1024
 
@@ -49,8 +49,9 @@ async def predict(image: UploadFile = File(...)) -> dict:
     if len(data) > MAX_BYTES:
         raise HTTPException(status_code=413, detail="Image is larger than 10 MB.")
     try:
-        if is_blurry(data):
-            return BLURRY
+        rejected = gate.check(data)
+        if rejected:
+            return {"status": "unclear", "reason": rejected.reason, "message": rejected.message}
         model = get_model()
         stage, health_head = model.predict(data)
     except (UnidentifiedImageError, OSError):

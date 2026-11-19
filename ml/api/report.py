@@ -34,7 +34,13 @@ DISEASE_ACTIONS = {
     "yellow_rust": ["Check nearby plants for yellow stripes of pustules along the leaves.", CONFIRM],
     "stem_rust": ["Check stems and leaf sheaths for dark red-brown pustules.", CONFIRM],
     "septoria": ["Check lower leaves for brown blotches with small dark specks.", CONFIRM],
-    "loose_smut": ["Mark affected plants; use certified, treated seed next season.", CONFIRM],
+    "loose_smut": [
+        # The model sometimes calls healthy green ears loose smut, so say how to check by eye.
+        "Check the ears: loose smut replaces the grain with black, powdery spores. "
+        "If the ears are green or golden and clean, this result is likely wrong.",
+        "If you do find black ears, mark those plants; use certified, treated seed next season.",
+        CONFIRM,
+    ],
     "powdery_mildew": ["Check for white powdery patches on leaves and stems.", CONFIRM],
 }
 
@@ -43,11 +49,12 @@ UNCLEAR = {
     "message": "The model isn't confident about this photo. Retake it closer, in daylight.",
 }
 
-# Same "unclear" status, so the website needs no change; only the reason differs.
-BLURRY = {"status": "unclear", "message": "Photo is blurry. Hold the camera steady and retake it in daylight."}
-
-STAGE_UNSURE = "The growth stage isn't clear from this photo. A photo of whole plants with their ears helps."
 HEALTH_UNSURE = "Crop health isn't clear from this photo. Take a close-up of the leaves to check for disease."
+
+STAGE_UNSURE = (
+    "The growth stage is uncertain from this photo. Photograph the whole plant, including the ear, "
+    "to check harvest readiness."
+)
 
 # Urdu, for the spoken summary. Stage names are in the form used before "میں ہے".
 STAGE_UR = {
@@ -72,17 +79,24 @@ def urdu_summary(stage: Head, health: Head, stage_sure: bool = True, health_sure
     if stage_sure:
         parts.append(f"فصل {STAGE_UR[stage.label]} میں ہے۔")
     else:
-        parts.append("اس تصویر سے فصل کا مرحلہ واضح نہیں ہے۔")
+        parts.append("اس تصویر سے فصل کا مرحلہ یقینی طور پر معلوم نہیں ہو سکا۔")
     if not health_sure:
         parts.append("اس تصویر سے فصل کی صحت واضح نہیں ہے۔ بیماری جانچنے کے لیے پتوں کی قریب سے تصویر لیں۔")
     elif health.label == "healthy":
         parts.append("فصل صحت مند ہے، کوئی بیماری نظر نہیں آئی۔ ہر ہفتے کھیت کا معائنہ کرتے رہیں۔")
     else:
         parts.append(f"فصل میں {DISEASE_UR[health.label]} کی علامات نظر آئی ہیں۔")
+        if health.label == "loose_smut":
+            parts.append(
+                "بالیوں کو دیکھیں: کانگیاری میں دانوں کی جگہ کالا سفوف بن جاتا ہے۔ "
+                "اگر بالیاں ہری یا سنہری اور صاف ہیں تو یہ نتیجہ غالباً درست نہیں۔"
+            )
         parts.append("اسپرے کرنے سے پہلے اپنے مقامی محکمہ زراعت کے افسر سے تصدیق ضرور کریں۔")
-    if stage_sure and stage.label == "ripening":
+    if not stage_sure:
+        parts.append("کٹائی کا وقت جانچنے کے لیے بالی سمیت پورے پودے کی تصویر لیں۔")
+    elif stage.label == "ripening":
         parts.append("فصل پک رہی ہے۔ جب دانے سخت اور خشک ہو جائیں تو کٹائی کا انتظام کریں۔")
-    elif stage_sure:
+    else:
         parts.append("فصل ابھی کٹائی کے لیے تیار نہیں ہے۔")
     return " ".join(parts)
 
@@ -97,6 +111,7 @@ def build_report(stage: Head, health: Head, threshold: float) -> dict:
     if not stage_sure and not health_sure:
         return UNCLEAR
 
+    # An unsure stage still gives a report, but never a harvest call.
     healthy = health.label == "healthy"
     ripe = stage_sure and stage.label == "ripening"
 

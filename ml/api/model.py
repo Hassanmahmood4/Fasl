@@ -27,18 +27,6 @@ def softmax(x: np.ndarray) -> np.ndarray:
     return e / e.sum()
 
 
-BLUR_LIMIT = 20.0  # Laplacian variance at 512px. Blurred sample: ~1; softest real sample: ~96.
-
-
-def is_blurry(data: bytes) -> bool:
-    """A real sharpness check, so "retake it" means the photo itself is the problem."""
-    img = ImageOps.exif_transpose(Image.open(io.BytesIO(data))).convert("L")
-    img.thumbnail((512, 512))
-    a = np.asarray(img, dtype=np.float32)
-    lap = 4 * a[1:-1, 1:-1] - a[:-2, 1:-1] - a[2:, 1:-1] - a[1:-1, :-2] - a[1:-1, 2:]
-    return float(lap.var()) < BLUR_LIMIT
-
-
 def load_config() -> dict:
     """Class order, image size and threshold. Cheap: does not load the model."""
     return json.loads(LABELS_PATH.read_text(encoding="utf-8"))
@@ -64,16 +52,13 @@ class WheatModel:
         canvas.paste(img, ((s - w) // 2, (s - h) // 2))
         canvas = canvas.resize((self.size, self.size), Image.BILINEAR)
         x = np.asarray(canvas, dtype=np.float32).transpose(2, 0, 1) / 255.0
-        x = (x - self.mean) / self.std
-        # The photo and its mirror image. Averaging both steadies the answer a little.
-        # (Crops were tried too and made it worse: the model was trained on whole, padded photos.)
-        return np.stack([x, x[:, :, ::-1]]).astype(np.float32)
+        return ((x - self.mean) / self.std)[None].astype(np.float32)
 
     def _head(self, logits: np.ndarray, labels: list[str]) -> Head:
-        p = np.mean([softmax(row) for row in logits], axis=0)
+        p = softmax(logits)
         i = int(p.argmax())
         return Head(labels[i], i, float(p[i]), {l: float(v) for l, v in zip(labels, p)})
 
     def predict(self, data: bytes) -> tuple[Head, Head]:
         stage, health = self.session.run(["stage", "health"], {"image": self.preprocess(data)})
-        return self._head(stage, self.config["growth_stage"]), self._head(health, self.config["health"])
+        return self._head(stage[0], self.config["growth_stage"]), self._head(health[0], self.config["health"])

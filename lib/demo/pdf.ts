@@ -1,6 +1,6 @@
 import type { jsPDF as JsPdf } from "jspdf";
 import { perforatedEdge, STAMP_HEIGHT, STAMP_WIDTH } from "@/components/footer/Stamp";
-import { healthLabel, percent, readinessLabel, STAGES, UNSURE } from "./report";
+import { healthLabel, percent, readinessLabel, STAGES, UNSURE, isStageUnsure } from "./report";
 import type { Photo, Report, Severity } from "./types";
 
 /* Site palette (tailwind.config.ts). Wheat colours are fills only, never text on white. */
@@ -378,7 +378,7 @@ export async function downloadReportPdf(report: Report, photo: Photo, isSample: 
   const gap = 4;
   const pillW = (CONTENT_W - gap * (STAGES.length - 1)) / STAGES.length;
   STAGES.forEach((name, i) => {
-    const current = !report.stage.uncertain && i + 1 === report.stage.index;
+    const current = !isStageUnsure(report) && i + 1 === report.stage.index;
     fill(current ? C.wheat : C.tint);
     doc.roundedRect(M + i * (pillW + gap), y, pillW, 30, 8, 8, "F");
     font(10, current ? "bold" : "normal", current ? C.black : C.charcoal);
@@ -387,7 +387,7 @@ export async function downloadReportPdf(report: Report, photo: Photo, isSample: 
   y += 30 + 14;
   font(9, "normal", C.charcoal);
   doc.text(
-    report.stage.uncertain
+    isStageUnsure(report)
       ? UNSURE
       : `Stage ${report.stage.index} of ${report.stage.total}, ${percent(report.stage.confidence)} confidence`,
     M,

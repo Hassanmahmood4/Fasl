@@ -1,6 +1,6 @@
 {
   "crop": "wheat",
-  "model_version": "fasl-wheat-v0.1",
+  "model_version": "fasl-wheat-v0.3",
   "image_size": 224,
   "mean": [
     0.485,
