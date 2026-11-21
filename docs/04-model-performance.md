@@ -25,7 +25,7 @@ Sub-line: "Trained on [IMAGES] crop images across [CLASSES] classes. Here's how 
 
 ## Charts
 
-> Current site: only the confusion matrix is shown. Training curves and per-class scores are switched off (`TrainingCurves.tsx`, `PerClassScores.tsx`). `metrics.json` keeps the same shape.
+> Current site: only the confusion matrix is shown. Training curves and per-class scores were removed; the sections below describe them in case they come back (see git history). `metrics.json` keeps the same shape.
 
 ### 1. Training curves (line chart)
 
