@@ -71,7 +71,6 @@ export function CropAssistant({ report }: { report: Report }) {
 
   const voice = useSpeechInput({
     language,
-    onInterim: setDraft,
     onFinal: (text) => void send(text, true),
     onError: setProblem,
   });
@@ -180,13 +179,28 @@ export function CropAssistant({ report }: { report: Report }) {
         {voice.supported && (
           <button
             type="button"
-            onClick={voice.listening ? voice.stop : voice.start}
-            disabled={waiting}
-            aria-label={voice.listening ? "Stop listening" : urdu ? "Speak in Urdu" : "Speak in English"}
+            onClick={() => {
+              if (voice.listening) voice.stop();
+              else {
+                setProblem(null);
+                void voice.start();
+              }
+            }}
+            disabled={waiting || voice.transcribing}
+            aria-label={
+              voice.transcribing ? "Turning speech into text" : voice.listening ? "Stop listening" : urdu ? "Speak in Urdu" : "Speak in English"
+            }
             aria-pressed={voice.listening}
-            className={`${ICON_BUTTON} ${voice.listening ? "animate-pulse bg-black text-white" : "bg-wheat text-black hover:bg-wheat-deep"}`}
+            aria-busy={voice.transcribing}
+            className={`${ICON_BUTTON} ${voice.listening ? "animate-pulse bg-black text-white motion-reduce:animate-none" : "bg-wheat text-black hover:bg-wheat-deep"}`}
           >
-            {voice.listening ? <MicOff aria-hidden="true" className="size-5" /> : <Mic aria-hidden="true" className="size-5" />}
+            {voice.transcribing ? (
+              <LoaderCircle aria-hidden="true" className="size-5 animate-spin motion-reduce:animate-none" />
+            ) : voice.listening ? (
+              <MicOff aria-hidden="true" className="size-5" />
+            ) : (
+              <Mic aria-hidden="true" className="size-5" />
+            )}
           </button>
         )}
         <label htmlFor="assistant-input" className="sr-only">
@@ -212,9 +226,11 @@ export function CropAssistant({ report }: { report: Report }) {
         </button>
       </form>
 
-      {voice.listening && (
+      {(voice.listening || voice.transcribing) && (
         <p className="mt-2 text-caption font-semibold" role="status">
-          Listening{urdu ? " in Urdu" : ""}… tap the mic again to stop.
+          {voice.transcribing
+            ? "Getting your words…"
+            : `Listening${urdu ? " in Urdu" : ""}… it stops when you pause, or tap the mic.`}
         </p>
       )}
       {problem && (

@@ -12,7 +12,7 @@ from PIL import UnidentifiedImageError
 
 from .chat import router as chat_router
 from .model import Head, WheatModel, load_config
-from . import gate, tts
+from . import gate, tts, voice
 from .report import build_report, urdu_summary
 
 MAX_BYTES = 10 * 1024 * 1024
@@ -26,6 +26,7 @@ app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", 
 api = APIRouter(prefix="/api")
 api.include_router(chat_router)
 api.include_router(tts.router)
+api.include_router(voice.router)
 
 CONFIG = load_config()
 

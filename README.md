@@ -110,6 +110,7 @@ All routes live under `/api`.
 | `GET` | `/api/health` | Returns `{ "ok": true, "model_version": "..." }`. The dashboard uses it to show "Model online". |
 | `POST` | `/api/predict` | Takes `multipart/form-data` with an `image` field, up to 10 MB. Returns a report, or `{ "status": "unclear" }`. |
 | `POST` | `/api/chat` | Takes `{ message, language: "en" \| "ur", report, history }` and returns `{ reply }`. Needs `GROQ_API_KEY`. |
+| `POST` | `/api/transcribe` | Takes a short voice clip (`audio`, multipart) and `language` (`en` or `ur`) and returns `{ text }`, using Groq Whisper. Powers the assistant's mic in every browser. Needs `GROQ_API_KEY`. |
 | `POST` | `/api/tts` | Takes `{ text, language }` and returns `audio/mpeg`. |
 | `GET` | `/api/audio?language=&text=` | The same speech, as a link. Reports use it for `urduAudioUrl`. |
 

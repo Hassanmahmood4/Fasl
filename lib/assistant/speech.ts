@@ -4,99 +4,147 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { apiUrl } from "@/lib/apiUrl";
 import type { AssistantLanguage } from "./api";
 
-/** Browser speech codes for each language. */
+/** Browser speech codes for each language (used by the browser's fallback voice). */
 const SPEECH_LANG: Record<AssistantLanguage, string> = { en: "en-US", ur: "ur-PK" };
 
-/* The Web Speech API isn't in TypeScript's DOM types yet, so describe the parts we use. */
-type RecognitionResultEvent = {
-  results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }>;
-};
-type RecognitionErrorEvent = { error: string };
-type Recognition = {
-  lang: string;
-  interimResults: boolean;
-  continuous: boolean;
-  onresult: ((event: RecognitionResultEvent) => void) | null;
-  onerror: ((event: RecognitionErrorEvent) => void) | null;
-  onend: (() => void) | null;
-  start: () => void;
-  stop: () => void;
-  abort: () => void;
-};
-type RecognitionConstructor = new () => Recognition;
-
-function recognitionClass(): RecognitionConstructor | undefined {
-  if (typeof window === "undefined") return undefined;
-  const w = window as unknown as {
-    SpeechRecognition?: RecognitionConstructor;
-    webkitSpeechRecognition?: RecognitionConstructor;
-  };
-  return w.SpeechRecognition ?? w.webkitSpeechRecognition;
-}
+/* Voice input: the browser records a short clip and the server transcribes it (api/voice.py).
+ * Browser speech recognition only works in Chrome and Edge, and poorly for Urdu, so it isn't used. */
+const MAX_RECORDING_MS = 30_000; // keeps uploads far under Vercel's request limit
+const SILENCE_AFTER_SPEECH_MS = 1_500; // stop once the speaker has finished
+const NO_SPEECH_MS = 8_000; // give up if nobody speaks
+const SPEECH_LEVEL = 0.02; // RMS level that counts as talking
+const TRANSCRIBE_TIMEOUT_MS = 30_000;
+const RECORDER_TYPES = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"];
 
 type SpeechInputOptions = {
   language: AssistantLanguage;
-  /** Called with the words heard so far, as they come in. */
-  onInterim: (text: string) => void;
-  /** Called once with the full sentence when the speaker stops. */
+  /** Called once with what was said, after the speaker stops. */
   onFinal: (text: string) => void;
   onError: (message: string) => void;
 };
 
-/** Turns speech into text, in English or Urdu. */
-export function useSpeechInput({ language, onInterim, onFinal, onError }: SpeechInputOptions) {
+function canRecord(): boolean {
+  return typeof window !== "undefined" && Boolean(navigator.mediaDevices?.getUserMedia) && typeof MediaRecorder !== "undefined";
+}
+
+async function transcribe(clip: Blob, language: AssistantLanguage): Promise<string> {
+  const form = new FormData();
+  form.append("audio", clip, "speech");
+  form.append("language", language);
+  let response: Response;
+  try {
+    response = await fetch(apiUrl("/transcribe"), { method: "POST", body: form, signal: AbortSignal.timeout(TRANSCRIBE_TIMEOUT_MS) });
+  } catch {
+    throw new Error("Couldn’t reach the voice service. Check your connection or type instead.");
+  }
+  if (response.status === 503) throw new Error("Voice input isn’t set up on this server yet. Please type instead.");
+  if (!response.ok) throw new Error("Voice input didn’t work. Please try again or type instead.");
+  const data = (await response.json().catch(() => null)) as { text?: unknown } | null;
+  return typeof data?.text === "string" ? data.text.trim() : "";
+}
+
+/** Turns speech into text, in English or Urdu, in any browser with a microphone. */
+export function useSpeechInput({ language, onFinal, onError }: SpeechInputOptions) {
   const [supported, setSupported] = useState(false);
   const [listening, setListening] = useState(false);
-  const recognition = useRef<Recognition | null>(null);
-  const handlers = useRef({ onInterim, onFinal, onError });
-  handlers.current = { onInterim, onFinal, onError };
+  const [transcribing, setTranscribing] = useState(false);
+  const recorder = useRef<MediaRecorder | null>(null);
+  const cleanup = useRef<() => void>(() => {});
+  const handlers = useRef({ onFinal, onError, language });
+  handlers.current = { onFinal, onError, language };
 
   useEffect(() => {
-    setSupported(Boolean(recognitionClass()));
-    return () => recognition.current?.abort();
+    setSupported(canRecord());
+    return () => {
+      if (recorder.current?.state === "recording") recorder.current.stop();
+      cleanup.current();
+    };
   }, []);
 
-  const stop = useCallback(() => recognition.current?.stop(), []);
+  const stop = useCallback(() => {
+    if (recorder.current?.state === "recording") recorder.current.stop();
+  }, []);
 
-  const start = useCallback(() => {
-    const Recognition = recognitionClass();
-    if (!Recognition) return;
-    recognition.current?.abort();
-
-    const r = new Recognition();
-    r.lang = SPEECH_LANG[language];
-    r.interimResults = true;
-    r.continuous = false;
-    let finalText = "";
-
-    r.onresult = (event) => {
-      let interim = "";
-      for (let i = 0; i < event.results.length; i++) {
-        const result = event.results[i];
-        if (result.isFinal) finalText += result[0].transcript;
-        else interim += result[0].transcript;
-      }
-      handlers.current.onInterim((finalText + interim).trim());
-    };
-    r.onerror = (event) => {
-      if (event.error === "no-speech" || event.error === "aborted") return;
+  const start = useCallback(async () => {
+    if (!canRecord() || recorder.current?.state === "recording") return;
+    let stream: MediaStream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+    } catch (error) {
+      const name = error instanceof DOMException ? error.name : "";
       handlers.current.onError(
-        event.error === "not-allowed" || event.error === "service-not-allowed"
-          ? "Microphone access was blocked. Allow it in your browser to speak."
-          : "Voice input didn’t work. Please try again or type instead.",
+        name === "NotAllowedError" || name === "SecurityError"
+          ? "Microphone access was blocked. Allow it in your browser’s site settings to speak."
+          : name === "NotFoundError"
+            ? "No microphone was found on this device."
+            : "The microphone couldn’t start. Please try again or type instead.",
       );
+      return;
+    }
+
+    const mimeType = RECORDER_TYPES.find((type) => MediaRecorder.isTypeSupported(type));
+    const rec = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+    const chunks: Blob[] = [];
+    let heardSpeech = false;
+    const language = handlers.current.language;
+
+    // Watch the input level so recording stops by itself when the speaker is done.
+    const context = new AudioContext();
+    const analyser = context.createAnalyser();
+    analyser.fftSize = 1024;
+    context.createMediaStreamSource(stream).connect(analyser);
+    const samples = new Float32Array(analyser.fftSize);
+    const startedAt = Date.now();
+    let lastSound = startedAt;
+    const timer = window.setInterval(() => {
+      analyser.getFloatTimeDomainData(samples);
+      let sum = 0;
+      for (const v of samples) sum += v * v;
+      const now = Date.now();
+      if (Math.sqrt(sum / samples.length) > SPEECH_LEVEL) {
+        heardSpeech = true;
+        lastSound = now;
+      }
+      const done =
+        now - startedAt > MAX_RECORDING_MS ||
+        (heardSpeech && now - lastSound > SILENCE_AFTER_SPEECH_MS) ||
+        (!heardSpeech && now - startedAt > NO_SPEECH_MS);
+      if (done && rec.state === "recording") rec.stop();
+    }, 100);
+
+    cleanup.current = () => {
+      window.clearInterval(timer);
+      stream.getTracks().forEach((track) => track.stop());
+      void context.close().catch(() => undefined);
     };
-    r.onend = () => {
+
+    rec.ondataavailable = (event) => {
+      if (event.data.size > 0) chunks.push(event.data);
+    };
+    rec.onstop = async () => {
+      cleanup.current();
+      cleanup.current = () => {};
+      recorder.current = null;
       setListening(false);
-      if (finalText.trim()) handlers.current.onFinal(finalText.trim());
+      if (!heardSpeech || chunks.length === 0) return;
+      setTranscribing(true);
+      try {
+        const text = await transcribe(new Blob(chunks, { type: rec.mimeType || mimeType || "audio/webm" }), language);
+        if (text) handlers.current.onFinal(text);
+        else handlers.current.onError("Didn’t catch that. Please try again, a little closer to the mic.");
+      } catch (error) {
+        handlers.current.onError(error instanceof Error ? error.message : "Voice input didn’t work.");
+      } finally {
+        setTranscribing(false);
+      }
     };
 
-    recognition.current = r;
+    recorder.current = rec;
+    rec.start();
     setListening(true);
-    r.start();
-  }, [language]);
+  }, []);
 
-  return { supported, listening, start, stop };
+  return { supported, listening, transcribing, start, stop };
 }
 
 function findVoice(language: AssistantLanguage): SpeechSynthesisVoice | undefined {
