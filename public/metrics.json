@@ -1,110 +1,117 @@
 {
-  "model_version": "fasl-wheat-v0.3",
+  "model_version": "fasl-wheat-v0.5",
   "summary": {
-    "accuracy": 0.9697,
-    "f1": 0.9176,
-    "images": 9617,
+    "accuracy": 0.9787,
+    "f1": 0.9433,
+    "images": 13567,
     "classes": 12,
-    "latency_ms": 71.4
+    "latency_ms": 27.4
   },
   "history": [
     {
       "epoch": 1,
-      "train_acc": 0.7743,
-      "val_acc": 0.9199,
-      "train_loss": 1.4722,
-      "val_loss": 1.0122
+      "train_acc": 0.7761,
+      "val_acc": 0.9184,
+      "train_loss": 1.5278,
+      "val_loss": 1.0706
     },
     {
       "epoch": 2,
-      "train_acc": 0.9133,
-      "val_acc": 0.9502,
-      "train_loss": 0.9975,
-      "val_loss": 0.923
+      "train_acc": 0.9128,
+      "val_acc": 0.9456,
+      "train_loss": 1.0586,
+      "val_loss": 0.9777
     },
     {
       "epoch": 3,
-      "train_acc": 0.9413,
-      "val_acc": 0.9678,
-      "train_loss": 0.9138,
-      "val_loss": 0.8728
+      "train_acc": 0.9453,
+      "val_acc": 0.966,
+      "train_loss": 0.9587,
+      "val_loss": 0.9367
     },
     {
       "epoch": 4,
-      "train_acc": 0.9578,
-      "val_acc": 0.9637,
-      "train_loss": 0.8689,
-      "val_loss": 0.8739
+      "train_acc": 0.9582,
+      "val_acc": 0.9681,
+      "train_loss": 0.9197,
+      "val_loss": 0.9393
     },
     {
       "epoch": 5,
-      "train_acc": 0.9631,
-      "val_acc": 0.9703,
-      "train_loss": 0.8396,
-      "val_loss": 0.8436
+      "train_acc": 0.9665,
+      "val_acc": 0.9745,
+      "train_loss": 0.8863,
+      "val_loss": 0.8839
     },
     {
       "epoch": 6,
-      "train_acc": 0.971,
-      "val_acc": 0.9794,
-      "train_loss": 0.8122,
-      "val_loss": 0.832
+      "train_acc": 0.9701,
+      "val_acc": 0.9783,
+      "train_loss": 0.8599,
+      "val_loss": 0.8875
     },
     {
       "epoch": 7,
-      "train_acc": 0.9776,
-      "val_acc": 0.9723,
-      "train_loss": 0.7923,
-      "val_loss": 0.8344
+      "train_acc": 0.9735,
+      "val_acc": 0.9788,
+      "train_loss": 0.8519,
+      "val_loss": 0.8747
     },
     {
       "epoch": 8,
-      "train_acc": 0.9775,
-      "val_acc": 0.9783,
-      "train_loss": 0.786,
-      "val_loss": 0.8278
+      "train_acc": 0.9785,
+      "val_acc": 0.9771,
+      "train_loss": 0.8333,
+      "val_loss": 0.8643
     },
     {
       "epoch": 9,
-      "train_acc": 0.9825,
-      "val_acc": 0.9778,
-      "train_loss": 0.771,
-      "val_loss": 0.8084
+      "train_acc": 0.9842,
+      "val_acc": 0.9822,
+      "train_loss": 0.8155,
+      "val_loss": 0.8597
     },
     {
       "epoch": 10,
-      "train_acc": 0.9852,
-      "val_acc": 0.9733,
-      "train_loss": 0.763,
-      "val_loss": 0.8166
+      "train_acc": 0.986,
+      "val_acc": 0.9796,
+      "train_loss": 0.806,
+      "val_loss": 0.8724
     },
     {
       "epoch": 11,
-      "train_acc": 0.988,
-      "val_acc": 0.9768,
-      "train_loss": 0.7501,
-      "val_loss": 0.8098
+      "train_acc": 0.9896,
+      "val_acc": 0.9792,
+      "train_loss": 0.7969,
+      "val_loss": 0.862
     },
     {
       "epoch": 12,
-      "train_acc": 0.9871,
-      "val_acc": 0.9819,
-      "train_loss": 0.7512,
-      "val_loss": 0.81
+      "train_acc": 0.9885,
+      "val_acc": 0.9809,
+      "train_loss": 0.7967,
+      "val_loss": 0.8586
     },
     {
       "epoch": 13,
-      "train_acc": 0.9898,
-      "val_acc": 0.9829,
-      "train_loss": 0.7431,
-      "val_loss": 0.8028
+      "train_acc": 0.9905,
+      "val_acc": 0.9822,
+      "train_loss": 0.7891,
+      "val_loss": 0.8525
     },
     {
       "epoch": 14,
-      "train_acc": 0.9899,
-      "val_acc": 0.9819,
-      "train_loss": 0.7393,
-      "val_loss": 0.8025
+      "train_acc": 0.9908,
+      "val_acc": 0.9809,
+      "train_loss": 0.786,
+      "val_loss": 0.8557
+    },
+    {
+      "epoch": 15,
+      "train_acc": 0.9903,
+      "val_acc": 0.9817,
+      "train_loss": 0.7885,
+      "val_loss": 0.853
     }
   ],
   "confusion": {
@@ -121,41 +128,41 @@
       ],
       "matrix": [
         [
-          432,
-          0,
+          781,
           1,
-          2,
-          1,
-          0,
-          0,
-          0
-        ],
-        [
-          2,
-          160,
-          0,
-          5,
-          0,
-          2,
-          0,
-          0
-        ],
-        [
-          6,
+          8,
           3,
-          452,
+          3,
+          1,
           0,
+          1
+        ],
+        [
+          1,
+          162,
+          1,
+          5,
           0,
           0,
           0,
           0
         ],
         [
-          4,
-          5,
           2,
-          34,
           0,
+          459,
+          0,
+          1,
+          0,
+          1,
+          0
+        ],
+        [
+          2,
+          5,
+          1,
+          35,
+          2,
           0,
           0,
           0
@@ -171,34 +178,34 @@
           0
         ],
         [
+          1,
+          0,
           0,
           1,
           0,
-          2,
-          3,
-          31,
+          35,
           1,
           1
         ],
         [
-          2,
-          1,
           5,
-          4,
+          0,
+          0,
+          0,
           1,
-          1,
-          110,
+          0,
+          118,
           0
         ],
         [
-          0,
           1,
           0,
-          1,
           0,
-          2,
           0,
-          639
+          0,
+          0,
+          0,
+          645
         ]
       ]
     },
@@ -211,28 +218,28 @@
       ],
       "matrix": [
         [
-          2,
+          133,
           0,
           0,
           0
         ],
         [
-          1,
-          3,
+          0,
+          115,
           4,
-          1
+          0
         ],
         [
           1,
-          0,
-          22,
-          3
-        ],
-        [
-          1,
-          0,
           2,
-          31
+          141,
+          2
+        ],
+        [
+          0,
+          0,
+          5,
+          149
         ]
       ]
     }
@@ -240,56 +247,56 @@
   "per_class": [
     {
       "label": "Healthy",
-      "precision": 0.9686,
-      "recall": 0.9908,
-      "f1": 0.9796
+      "precision": 0.9849,
+      "recall": 0.9787,
+      "f1": 0.9818
     },
     {
       "label": "Brown rust",
-      "precision": 0.9357,
-      "recall": 0.9467,
-      "f1": 0.9412
+      "precision": 0.9643,
+      "recall": 0.9586,
+      "f1": 0.9614
     },
     {
       "label": "Yellow rust",
-      "precision": 0.9826,
-      "recall": 0.9805,
-      "f1": 0.9815
+      "precision": 0.9787,
+      "recall": 0.9914,
+      "f1": 0.985
     },
     {
       "label": "Stem rust",
-      "precision": 0.6939,
-      "recall": 0.7556,
-      "f1": 0.7234
+      "precision": 0.7778,
+      "recall": 0.7778,
+      "f1": 0.7778
     },
     {
       "label": "Septoria",
-      "precision": 0.9286,
+      "precision": 0.9028,
       "recall": 0.9848,
-      "f1": 0.9559
+      "f1": 0.942
     },
     {
       "label": "Loose smut",
-      "precision": 0.8611,
-      "recall": 0.7949,
-      "f1": 0.8267
+      "precision": 0.9722,
+      "recall": 0.8974,
+      "f1": 0.9333
     },
     {
       "label": "Powdery mildew",
-      "precision": 0.991,
-      "recall": 0.8871,
-      "f1": 0.9362
+      "precision": 0.9833,
+      "recall": 0.9516,
+      "f1": 0.9672
     },
     {
       "label": "Not wheat",
-      "precision": 0.9984,
-      "recall": 0.9938,
-      "f1": 0.9961
+      "precision": 0.9969,
+      "recall": 0.9985,
+      "f1": 0.9977
     }
   ],
   "stage_summary": {
-    "accuracy": 0.8169,
-    "f1": 0.6962,
-    "test_images": 71
+    "accuracy": 0.9746,
+    "f1": 0.9751,
+    "test_images": 552
   }
 }
