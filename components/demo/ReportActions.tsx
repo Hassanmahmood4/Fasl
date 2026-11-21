@@ -17,33 +17,43 @@ type ReportActionsProps = {
 export function ReportActions({ report, photo, isSample, showDownload = true }: ReportActionsProps) {
   const audio = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [loadingAudio, setLoadingAudio] = useState(false);
   const [saving, setSaving] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
 
-  useEffect(
-    () => () => {
-      audio.current?.pause();
-    },
-    [],
-  );
+  // Fetch the Urdu audio as soon as the report shows, so it is ready before the button is pressed.
+  useEffect(() => {
+    if (!report.urduAudioUrl) return;
+    const clip = new Audio(report.urduAudioUrl);
+    clip.preload = "auto";
+    clip.onended = () => setPlaying(false);
+    clip.load();
+    audio.current = clip;
+    setPlaying(false);
+    return () => {
+      clip.pause();
+      clip.removeAttribute("src");
+      audio.current = null;
+    };
+  }, [report.urduAudioUrl]);
 
   const toggleAudio = async () => {
-    if (!report.urduAudioUrl) return;
-    if (!audio.current) {
-      audio.current = new Audio(report.urduAudioUrl);
-      audio.current.onended = () => setPlaying(false);
-    }
+    const clip = audio.current;
+    if (!clip || loadingAudio) return;
     if (playing) {
-      audio.current.pause();
+      clip.pause();
       setPlaying(false);
       return;
     }
+    setLoadingAudio(true);
     try {
-      await audio.current.play();
+      await clip.play();
       setPlaying(true);
       setProblem(null);
     } catch {
       setProblem("The Urdu audio couldn’t play. Please try again.");
+    } finally {
+      setLoadingAudio(false);
     }
   };
 
@@ -71,7 +81,7 @@ export function ReportActions({ report, photo, isSample, showDownload = true }: 
           className={`${BUTTON} bg-wheat text-black hover:bg-wheat-deep`}
         >
           <AudioIcon aria-hidden="true" className="size-5" />
-          {playing ? "Pause Urdu audio" : "Listen in Urdu"}
+          {loadingAudio ? "Loading audio" : playing ? "Pause Urdu audio" : "Listen in Urdu"}
         </button>
         {showDownload && (
           <button

@@ -59,7 +59,9 @@ def audio_url(text: str, language: str) -> str:
 
 
 def _mp3(data: bytes) -> Response:
-    return Response(content=data, media_type="audio/mpeg", headers={"Cache-Control": "public, max-age=86400"})
+    # The URL holds the full text, so a clip never changes: let Vercel's CDN keep it and skip the speech service.
+    return Response(content=data, media_type="audio/mpeg",
+                    headers={"Cache-Control": "public, max-age=86400, s-maxage=31536000, immutable"})
 
 
 class TtsRequest(BaseModel):
